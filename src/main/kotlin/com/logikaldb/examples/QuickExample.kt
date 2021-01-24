@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 
 private fun main() {
     runBlocking {
-        val data = or(
+        val dataset = or(
             and(eq(vr("name"), "Bulbasaur"), eq(vr("type"), "Grass")),
             and(eq(vr("name"), "Charmander"), eq(vr("type"), "Fire")),
             and(eq(vr("name"), "Squirtle"), eq(vr("type"), "Water")),
@@ -19,7 +19,7 @@ private fun main() {
         )
 
         val query = and(
-            data,
+            dataset,
             eq(vr("type"), "Fire")
         )
 

@@ -18,7 +18,7 @@ Foundational reactive logical database
 ## Quick example
 ```kotlin
 // Define our small pokemon dataset
-val data = or(
+val dataset = or(
    and(eq(vr("name"), "Bulbasaur"), eq(vr("type"), "Grass")),
    and(eq(vr("name"), "Charmander"), eq(vr("type"), "Fire")),
    and(eq(vr("name"), "Squirtle"), eq(vr("type"), "Water")),
@@ -27,7 +27,7 @@ val data = or(
 
 // Query fire pokemons from the dataset
 val query = and(
-   data,
+   dataset,
    eq(vr("type"), "Fire")
 )
 
