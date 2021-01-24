@@ -11,9 +11,34 @@ Foundational reactive logical database
 * Built on top of FoundationDB
 
 ## Getting started
-1. Install FoubndationDB client and server: https://www.foundationdb.org/download/
-2. Include LogikalDB as a gradle source dependency (or just clone this repository)
-3. Try running some examples in the repository
+1. Install [FoubndationDB client and server](https://www.foundationdb.org/download/)
+2. Include LogikalDB as a gradle source dependency (or just clone and use this repository)
+3. Try running [some examples in the repository](https://github.com/MechaRex/logikaldb/tree/master/src/main/kotlin/com/logikaldb/examples)
+
+## Quick example
+```kotlin
+// Define our small pokemon dataset
+val data = or(
+   and(eq(vr("name"), "Bulbasaur"), eq(vr("type"), "Grass")),
+   and(eq(vr("name"), "Charmander"), eq(vr("type"), "Fire")),
+   and(eq(vr("name"), "Squirtle"), eq(vr("type"), "Water")),
+   and(eq(vr("name"), "Vulpix"), eq(vr("type"), "Fire"))
+)
+
+// Query fire pokemons from the dataset
+val query = and(
+   data,
+   eq(vr("type"), "Fire")
+)
+
+// Run the query and print out the results
+LogikalDB().run(query)
+   .filterNotNull()
+   .collect { println("Result: $it") }
+
+//Result: State(valueMap={Variable(variableName=type)=Fire, Variable(variableName=name)=Vulpix}, constraintMap={})
+//Result: State(valueMap={Variable(variableName=type)=Fire, Variable(variableName=name)=Charmander}, constraintMap={})
+```
 
 ## Building blocks of LogikalDB
 LogikalDB basically built up by three big components:
