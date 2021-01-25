@@ -39,6 +39,9 @@ LogikalDB().run(query)
 //Result: State(valueMap={Variable(variableName=type)=Fire, Variable(variableName=name)=Vulpix}, constraintMap={})
 //Result: State(valueMap={Variable(variableName=type)=Fire, Variable(variableName=name)=Charmander}, constraintMap={})
 ```
+This quick example shows the basic principles behind LogikalDB, which is to use basic logical operators to describe and query our data.\
+It doesn't actually show any of the database operation like `write` or `read`, which can store and read out these logical data structures.\
+Please look into the [examples](https://github.com/MechaRex/logikaldb/tree/master/src/main/kotlin/com/logikaldb/examples) folder if you want to see more complex examples.
 
 ## Building blocks of LogikalDB
 LogikalDB basically built up by three big components:
