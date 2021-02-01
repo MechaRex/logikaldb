@@ -35,6 +35,14 @@ public data class State(
         }
     }
 
+    public fun valueOf(variables: List<Variable>): Map<Variable, Value> {
+        return if (variables.isEmpty()) {
+            valueMap.keys.map { it to valueOf(it) }.toMap()
+        } else {
+            variables.map { it to valueOf(it) }.toMap()
+        }
+    }
+
     internal fun hasConstraint(variable: Variable): Boolean {
         return constraintMap.containsKey(variable)
     }
