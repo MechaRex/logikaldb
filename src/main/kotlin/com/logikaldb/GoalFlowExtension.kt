@@ -59,3 +59,22 @@ public fun Flow<Goal>.selectFlow(logikalDB: LogikalDB, variables: List<Variable>
 public fun Flow<Goal>.selectFlow(logikalDB: LogikalDB, vararg variables: Variable): Flow<Row> {
     return this.selectFlow(logikalDB, variables.toList())
 }
+
+private fun Flow<Goal>.join(otherGoalFlow: Flow<Goal>, joinGoal: Goal): Flow<Goal> {
+    return this.map { thisGoal: Goal ->
+        otherGoalFlow.map { otherGoal: Goal ->
+            Constraint.and(thisGoal, otherGoal, joinGoal)
+        }
+    }.flattenMerge()
+}
+
+public fun Flow<Goal>.join(otherGoalFlows: List<Flow<Goal>>, joinGoal: Goal): Flow<Goal> {
+    val joinedGoalFlow = this.map { Constraint.and(it, joinGoal) }
+    return otherGoalFlows.fold(joinedGoalFlow) { accGoalFlow, currGoalFlow ->
+        accGoalFlow.join(currGoalFlow, joinGoal)
+    }
+}
+
+public fun Flow<Goal>.join(vararg otherGoalFlows: Flow<Goal>, joinGoal: Goal): Flow<Goal> {
+    return this.join(otherGoalFlows.toList(), joinGoal)
+}
