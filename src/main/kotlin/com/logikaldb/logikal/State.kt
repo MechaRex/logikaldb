@@ -18,7 +18,7 @@ package com.logikaldb.logikal
 
 // TODO: We should think about mutable state if this is incredibly slow
 public data class State(
-    private val valueMap: Map<Variable, Value> = emptyMap(),
+    private val valueMap: Result = emptyMap(),
     private val constraintMap: Map<Variable, List<VariableConstraint>> = emptyMap()
 ) {
 
@@ -33,6 +33,18 @@ public data class State(
         } else {
             value
         }
+    }
+
+    public fun valuesOf(variables: List<Variable>): Result {
+        return if (variables.isEmpty()) {
+            valueMap.keys.map { it to valueOf(it) }.toMap()
+        } else {
+            variables.map { it to valueOf(it) }.toMap()
+        }
+    }
+
+    public fun valuesOf(vararg variables: Variable): Result {
+        return valuesOf(variables.toList())
     }
 
     internal fun hasConstraint(variable: Variable): Boolean {

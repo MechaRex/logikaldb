@@ -22,4 +22,5 @@ public typealias Value = Any
 public typealias VariableName = String
 public data class Variable(val variableName: VariableName)
 public typealias VariableConstraint = (State) -> State?
+public typealias Result = Map<Variable, Value>
 internal typealias Goal = (State) -> Flow<State?>

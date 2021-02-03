@@ -6,10 +6,10 @@ import com.logikaldb.Constraint.or
 import com.logikaldb.Constraint.vr
 import com.logikaldb.LogikalDB
 import com.logikaldb.StdLib.notEq
+import com.logikaldb.and
+import com.logikaldb.select
+import com.logikaldb.selectFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flattenMerge
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 
@@ -36,17 +36,20 @@ private fun main() {
 
         // Query the employee data with lastName==Smith constraint
         logikalDB.read(listOf("example", "query"), "employee")
-            .map { and(it, eq(lastName, "Smith")) }
-            .map { logikalDB.run(it) }
-            .flattenMerge().filterNotNull()
-            .collect { println("Result with lastName==Smith query: $it") }
-        println()
+            .and(eq(lastName, "Smith"))
+            .select(logikalDB)
+            .forEach { println("Result with lastName==Smith query: $it") }
 
         // Query the employee data with lastName!=Smith and department==IT constraint
         logikalDB.read(listOf("example", "query"), "employee")
-            .map { and(it, notEq(lastName, "Smith"), eq(department, "IT")) }
-            .map { logikalDB.run(it) }
-            .flattenMerge().filterNotNull()
-            .collect { println("Result with lastName!=Smith and department==IT query: $it") }
+            .and(notEq(lastName, "Smith"), eq(department, "IT"))
+            .select(logikalDB)
+            .forEach { println("Result with lastName!=Smith and department==IT query: $it") }
+
+        // Same query as before but using selectFlow instead
+        logikalDB.read(listOf("example", "query"), "employee")
+            .and(notEq(lastName, "Smith"), eq(department, "IT"))
+            .selectFlow(logikalDB)
+            .collect { println("Flow Result with lastName!=Smith and department==IT query: $it") }
     }
 }
