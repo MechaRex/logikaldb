@@ -35,9 +35,9 @@ private fun main() {
         val depManager = vr("department.manager")
         val depManagerEmail = vr("department.managerEmail")
 
-        // Write manager data to the database
+        // Write department data to the database
         logikalDB.write(
-            listOf("example", "join"), "manager",
+            listOf("example", "join"), "department",
             or(
                 and(eq(depDepartmentName, "HR"), eq(depManager, "Chris Harris"), eq(depManagerEmail, "charris@company.com")),
                 and(eq(depDepartmentName, "IT"), eq(depManager, "Olivia Jones"), eq(depManagerEmail, "ojones@company.com")),
@@ -47,13 +47,13 @@ private fun main() {
 
         // Read out the data (flow) from the database
         val employees = logikalDB.read(listOf("example", "join"), "employee")
-        val managers = logikalDB.read(listOf("example", "join"), "manager")
+        val departments = logikalDB.read(listOf("example", "join"), "department")
 
         // This is the constraint used to join the tables based on the department name
         val joinGoal = eq(empDepartment, depDepartmentName)
 
         // Run the join query and print out the results
-        employees.join(joinGoal, managers)
+        employees.join(joinGoal, departments)
             .select(logikalDB)
             .forEach { println("Result by joining two tables: $it") }
     }
