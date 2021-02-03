@@ -10,9 +10,9 @@ import com.logikaldb.StdLib.notEq
 import com.logikaldb.entity.Goal
 import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Variable
+import com.logikaldb.select
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 
@@ -77,16 +77,17 @@ private fun main() {
     runBlocking {
         val logikalDB = LogikalDB()
 
-        // Running the query without using the database
+        // Running the query without using the database and get the value of the murder
         logikalDB.run(murderer())
             .filterNotNull()
-            .collect { println("Result w/o db: $it") }
+            .collect { println("Result w/o db: ${it.valueOf(murder)}") }
 
-        // First saving the query to the db then getting it back from it and finally running it
+        // Save the murder mystery query to the database
         logikalDB.write(listOf("example", "murderMystery"), "murderer", murderer())
+
+        // Read out the query from the db and evaluate it, but only ask for the murder as the result
         logikalDB.read(listOf("example", "murderMystery"), "murderer")
-            .map { logikalDB.run(it) }
-            .flattenMerge().filterNotNull()
-            .collect { println("Result w/ db: $it") }
+            .select(logikalDB, murder)
+            .forEach { println("Result w/ db: $it") }
     }
 }
