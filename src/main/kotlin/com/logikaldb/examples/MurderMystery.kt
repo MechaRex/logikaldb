@@ -11,9 +11,6 @@ import com.logikaldb.entity.Goal
 import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Variable
 import com.logikaldb.select
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 
 /*
