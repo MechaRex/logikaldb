@@ -17,30 +17,30 @@ Foundational reactive logical database
 
 ## Quick example
 ```kotlin
-// Define our small pokemon dataset
+val logikalDB = LogikalDB()
+
 val dataset = or(
    and(eq(vr("name"), "Bulbasaur"), eq(vr("type"), "Grass")),
    and(eq(vr("name"), "Charmander"), eq(vr("type"), "Fire")),
    and(eq(vr("name"), "Squirtle"), eq(vr("type"), "Water")),
    and(eq(vr("name"), "Vulpix"), eq(vr("type"), "Fire"))
 )
+val query = eq(vr("type"), "Fire")
 
-// Query fire pokemons from the dataset
-val query = and(
-   dataset,
-   eq(vr("type"), "Fire")
-)
+// Write the dataset to the database
+logikalDB.write(listOf("example", "quick"), "pokemon", dataset)
 
-// Run the query and print out the results
-LogikalDB().run(query)
-   .filterNotNull()
-   .collect { println("Result: $it") }
+// Query the pokemon, which type is fire and finally print out the results
+logikalDB.read(listOf("example", "quick"), "pokemon")
+   .and(query)
+   .select(logikalDB)
+   .forEach { println("Result: $it") }
 
-//Result: State(valueMap={Variable(variableName=type)=Fire, Variable(variableName=name)=Vulpix}, constraintMap={})
-//Result: State(valueMap={Variable(variableName=type)=Fire, Variable(variableName=name)=Charmander}, constraintMap={})
+// Result: {Variable(variableName=type)=Fire, Variable(variableName=name)=Vulpix}
+// Result: {Variable(variableName=type)=Fire, Variable(variableName=name)=Charmander}
 ```
-This quick example shows the basic principles behind LogikalDB, which is to use basic logical operators to describe and query our data.\
-It doesn't actually show any of the database operation like `write` or `read`, which can store and read out these logical data structures.\
+This quick example shows the basic principles behind LogikalDB, which is to use basic logical operators to describe and query our dataset.\
+You can also see that LogikalDB is a folder path based key-value database. For example in this case the folder path is `/example/quick` and the key is `pokemon`.\
 Please look into the [examples](https://github.com/MechaRex/logikaldb/tree/master/src/main/kotlin/com/logikaldb/examples) folder if you want to see more complex examples.
 
 ## Building blocks of LogikalDB
@@ -134,16 +134,33 @@ val secondQueryConstraintFirstPart = or(eq(vr("thirdField"), "thirdValueA"), eq(
 val secondQueryConstraintSecondPart = notEq(vr("fourthField"), "fourthValue")
 val secondQueryConstraint = and(secondQueryConstraintFirstPart, secondQueryConstraintSecondPart)
 
-logikalDB.read(listOf("logikaldb"), "key") // getting the data
-   .map{ and(it, firstQueryConstraint) } // makes data more specialized
-   .map{ and(it, secondQueryConstraint) } // makes data even more specialized
-   .map{ logikalDB.run(it) } // running the query
-   .flattenMerge().collect { println("$it") } // we run the whole flow and print out the query result(s)
+logikalDB.read(listOf("logikaldb"), "key") // getting the data from the db
+   .and(firstQueryConstraint, secondQueryConstraint) // query the data based on the two query constraints
+   .select(logikalDB) // run the query on the data
+   .forEach { println("Result: $it") } // print out the results
 ```
 In this example at first we read out the data, but remember that it only returns instantly a flow, so nothing really happens. 
-The flow and everything attached to it is only run when we call the `collect` terminal operation at the end. Until we call `collect`, we are basically just building up our database query.
+The flow and everything attached to it is only run when we call the `select` terminal operation at the end. 
+Until we call `select`, we are basically just building up our database query.
 
 Another interesting thing about the LogikalDB queries is that we can also store them in tha database as LogikalDB has an unified data model.
+
+## Joining
+Joining in LogikalDB is basically about combining two or multiple data flows based on a join constraint.
+```kotlin
+// Read out the data (flow) from the database
+val employees = logikalDB.read(listOf("example", "join"), "employee")
+val departments = logikalDB.read(listOf("example", "join"), "department")
+
+// This is the constraint used to join the tables based on the department name
+val joinGoal = eq(empDepartment, depDepartmentName)
+
+// Run the join query and print out the results
+employees.join(joinGoal, departments)
+   .select(logikalDB)
+   .forEach { println("Result by joining two tables: $it") }
+```
+In this example you can see that we are joining together the employees and departments tables based on the join constraint.
 
 ## Using Stdlib
 LogikalDB by design has a small extensible core, which also means that it has a standard library which provides extra features that are missing from this small core.
