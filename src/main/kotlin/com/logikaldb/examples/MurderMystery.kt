@@ -77,17 +77,12 @@ private fun main() {
     runBlocking {
         val logikalDB = LogikalDB()
 
-        // Running the query without using the database and get the value of the murder
-        logikalDB.run(murderer())
-            .filterNotNull()
-            .collect { println("Result w/o db: ${it.valueOf(murder)}") }
-
         // Save the murder mystery query to the database
         logikalDB.write(listOf("example", "murderMystery"), "murderer", murderer())
 
         // Read out the query from the db and evaluate it, but only ask for the murder as the result
         logikalDB.read(listOf("example", "murderMystery"), "murderer")
             .select(logikalDB, murder)
-            .forEach { println("Result w/ db: $it") }
+            .forEach { println("Result: $it") }
     }
 }
