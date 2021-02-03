@@ -22,6 +22,6 @@ import com.logikaldb.ConstraintName
 // TODO: Think a better way to create the name of the function
 internal object ConstraintConverter {
     fun convertToConstraintName(constraintFun: ConstraintFun): ConstraintName {
-        return "$constraintFun#${constraintFun.hashCode()}"
+        return "$constraintFun"
     }
 }
