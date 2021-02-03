@@ -16,7 +16,6 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.logikal
 
-// TODO: We should think about mutable state if this is incredibly slow
 public data class State(
     private val valueMap: Result = emptyMap(),
     private val constraintMap: Map<Variable, List<VariableConstraint>> = emptyMap()

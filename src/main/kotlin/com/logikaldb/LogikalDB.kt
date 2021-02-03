@@ -50,7 +50,6 @@ public class LogikalDB(constraintLibraries: List<ConstraintLibrary>, fdbVersion:
         databaseHandler.write(directoryPath, key, serializedValue)
     }
 
-    // TODO: Implement a run variant which gives back a Goal(terminal) or a Flow<Goal>(non-terminal)
     public fun run(goal: Goal, state: State = State()): Flow<State?> {
         val logikalGoal = goalConverter.convertToGoal(GoalEntity(goal))
         return logikalGoal(state)

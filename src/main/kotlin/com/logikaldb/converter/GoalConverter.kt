@@ -26,7 +26,6 @@ import com.logikaldb.logikal.Goal
 import com.logikaldb.logikal.Logikal
 import kotlinx.coroutines.FlowPreview
 
-// TODO: GoalConverter flips the order of the goals during the conversion. Should we fix it?
 internal class GoalConverter(private val constraintRegistry: ConstraintRegistry) {
 
     enum class GoalCombinatorType { NONE, AND, OR }
@@ -129,7 +128,6 @@ internal class GoalConverter(private val constraintRegistry: ConstraintRegistry)
         return Logikal.equal(firstValue, secondValue)
     }
 
-    // TODO: Should we use reflection instead of the registry for accessing the constraints?
     private fun createConstraintGoal(constraintEntity: ConstraintEntity): Goal {
         return if (constraintEntity.constraintGoal != null) {
             constraintEntity.constraintGoal
