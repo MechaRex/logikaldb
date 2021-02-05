@@ -41,24 +41,24 @@ public fun Flow<Goal>.or(vararg goals: Goal): Flow<Goal> {
     return this.or(goals.toList())
 }
 
-public suspend fun Flow<Goal>.select(logikalDB: LogikalDB, variables: List<Variable>): List<Result> {
-    return this.map { logikalDB.run(it) }
+public suspend fun Flow<Goal>.selectBy(queryEngine: LogikalDB, selectedVariables: List<Variable>): List<Result> {
+    return this.map { queryEngine.run(it) }
         .flattenMerge().filterNotNull()
-        .map { it.valuesOf(variables) }.toList()
+        .map { it.valuesOf(selectedVariables) }.toList()
 }
 
-public suspend fun Flow<Goal>.select(logikalDB: LogikalDB, vararg variables: Variable): List<Result> {
-    return this.select(logikalDB, variables.toList())
+public suspend fun Flow<Goal>.selectBy(queryEngine: LogikalDB, vararg selectedVariables: Variable): List<Result> {
+    return this.selectBy(queryEngine, selectedVariables.toList())
 }
 
-public fun Flow<Goal>.selectFlow(logikalDB: LogikalDB, variables: List<Variable>): Flow<Result> {
-    return this.map { logikalDB.run(it) }
+public fun Flow<Goal>.selectFlowBy(queryEngine: LogikalDB, selectedVariables: List<Variable>): Flow<Result> {
+    return this.map { queryEngine.run(it) }
         .flattenMerge().filterNotNull()
-        .map { it.valuesOf(variables) }
+        .map { it.valuesOf(selectedVariables) }
 }
 
-public fun Flow<Goal>.selectFlow(logikalDB: LogikalDB, vararg variables: Variable): Flow<Result> {
-    return this.selectFlow(logikalDB, variables.toList())
+public fun Flow<Goal>.selectFlowBy(queryEngine: LogikalDB, vararg selectedVariables: Variable): Flow<Result> {
+    return this.selectFlowBy(queryEngine, selectedVariables.toList())
 }
 
 private fun Flow<Goal>.join(joinGoal: Goal, otherGoalFlow: Flow<Goal>): Flow<Goal> {

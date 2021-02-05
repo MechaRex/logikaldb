@@ -33,7 +33,7 @@ logikalDB.write(listOf("example", "quick"), "pokemon", dataset)
 // Query the pokemon, which type is fire and finally print out the results
 logikalDB.read(listOf("example", "quick"), "pokemon")
    .and(query)
-   .select(logikalDB)
+   .selectBy(logikalDB)
    .forEach { println("Result: $it") }
 
 // Result: {Variable(variableName=type)=Fire, Variable(variableName=name)=Vulpix}
@@ -136,12 +136,12 @@ val secondQueryConstraint = and(secondQueryConstraintFirstPart, secondQueryConst
 
 logikalDB.read(listOf("logikaldb"), "key") // getting the data from the db
    .and(firstQueryConstraint, secondQueryConstraint) // query the data based on the two query constraints
-   .select(logikalDB) // run the query on the data
+   .selectBy(logikalDB) // run the query on the data
    .forEach { println("Result: $it") } // print out the results
 ```
 In this example at first we read out the data, but remember that it only returns instantly a flow, so nothing really happens. 
-The flow and everything attached to it is only run when we call the `select` terminal operation at the end. 
-Until we call `select`, we are basically just building up our database query.
+The flow and everything attached to it is only run when we call the `selectBy` terminal operation at the end. 
+Until we call `selectBy`, we are basically just building up our database query.
 
 Another interesting thing about the LogikalDB queries is that we can also store them in tha database as LogikalDB has an unified data model.
 
@@ -157,7 +157,7 @@ val joinGoal = eq(empDepartment, depDepartmentName)
 
 // Run the join query and print out the results
 employees.join(joinGoal, departments)
-   .select(logikalDB)
+   .selectBy(logikalDB)
    .forEach { println("Result by joining two tables: $it") }
 ```
 In this example you can see that we are joining together the employees and departments tables based on the join constraint.

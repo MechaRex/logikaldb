@@ -6,7 +6,7 @@ import com.logikaldb.Constraint.or
 import com.logikaldb.Constraint.vr
 import com.logikaldb.LogikalDB
 import com.logikaldb.and
-import com.logikaldb.select
+import com.logikaldb.selectBy
 import kotlinx.coroutines.runBlocking
 
 private fun main() {
@@ -27,7 +27,7 @@ private fun main() {
         // Query the pokemon, which type is fire and finally print out the results
         logikalDB.read(listOf("example", "quick"), "pokemon")
             .and(query)
-            .select(logikalDB)
+            .selectBy(logikalDB)
             .forEach { println("Result: $it") }
     }
 }

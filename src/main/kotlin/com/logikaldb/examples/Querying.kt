@@ -7,8 +7,8 @@ import com.logikaldb.Constraint.vr
 import com.logikaldb.LogikalDB
 import com.logikaldb.StdLib.notEq
 import com.logikaldb.and
-import com.logikaldb.select
-import com.logikaldb.selectFlow
+import com.logikaldb.selectBy
+import com.logikaldb.selectFlowBy
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
@@ -37,19 +37,19 @@ private fun main() {
         // Query the employee data with lastName==Smith constraint
         logikalDB.read(listOf("example", "query"), "employee")
             .and(eq(lastName, "Smith"))
-            .select(logikalDB)
+            .selectBy(logikalDB)
             .forEach { println("Result with lastName==Smith query: $it") }
 
         // Query the employee data with lastName!=Smith and department==IT constraint
         logikalDB.read(listOf("example", "query"), "employee")
             .and(notEq(lastName, "Smith"), eq(department, "IT"))
-            .select(logikalDB)
+            .selectBy(logikalDB)
             .forEach { println("Result with lastName!=Smith and department==IT query: $it") }
 
         // Same query as before but using selectFlow instead
         logikalDB.read(listOf("example", "query"), "employee")
             .and(notEq(lastName, "Smith"), eq(department, "IT"))
-            .selectFlow(logikalDB)
+            .selectFlowBy(logikalDB)
             .collect { println("Flow Result with lastName!=Smith and department==IT query: $it") }
     }
 }
