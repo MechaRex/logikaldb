@@ -16,15 +16,38 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.logikal
 
+/**
+ * State is the stack frame used in the embedded logical programming language.
+ * You should not use the [State] constructor directly.
+ *
+ * @param valueMap variable values
+ * @param constraintMap variable constraints
+ * @constructor state instance
+ * */
 public data class State(
     private val valueMap: Result = emptyMap(),
     private val constraintMap: Map<Variable, List<VariableConstraint>> = emptyMap()
 ) {
 
+    /**
+     * Shows if a variable has a value in the state.
+     *
+     * @param variable variable to check
+     * @return does the variable have a value
+     * */
     public fun hasValue(variable: Variable): Boolean {
         return valueOf(variable) !is Variable
     }
 
+    /**
+     * Gives back the value of the provided value.
+     * Value can be either [Value] or [Variable].
+     * If the value is [Variable] then it gives back the value of the variable in the state.
+     * If the value is [Value] then it gives back the provided value itself.
+     *
+     * @param value provided value
+     * @return value of the provided value
+     * */
     public tailrec fun valueOf(value: Value): Value {
         val variableValue = valueMap[value]
         return if (variableValue != null) {
@@ -34,6 +57,13 @@ public data class State(
         }
     }
 
+    /**
+     * Gives back the result of the state.
+     * [Result] is the values of the provided variables.
+     *
+     * @param variables provided variables that we are interested in
+     * @return result of the state
+     * */
     public fun valuesOf(variables: List<Variable>): Result {
         return if (variables.isEmpty()) {
             valueMap.keys.map { it to valueOf(it) }.toMap()
@@ -42,6 +72,13 @@ public data class State(
         }
     }
 
+    /**
+     * Gives back the result of the state.
+     * [Result] is the values of the provided variables.
+     *
+     * @param variables provided variables that we are interested in
+     * @return result of the state
+     * */
     public fun valuesOf(vararg variables: Variable): Result {
         return valuesOf(variables.toList())
     }

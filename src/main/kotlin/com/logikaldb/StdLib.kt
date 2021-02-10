@@ -20,7 +20,20 @@ import com.logikaldb.entity.Goal
 import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Variable
 
+/**
+ * Standard library of LogikalDB.
+ * */
 public object StdLib : ConstraintLibrary {
+
+    /**
+     * Creates a not equal constraint.
+     * [notEq] is a constraint constructor.
+     * Not equal means that [firstValue] != [secondValue] and [secondValue] != [firstValue].
+     *
+     * @param firstValue first value in the constraint
+     * @param secondValue second value in the constraint
+     * @return not equal constraint
+     * */
     public fun notEq(firstValue: Value, secondValue: Value): Goal {
         return Constraint.create(::notEq, firstValue, secondValue) { state ->
             val valueOfFirst = state.valueOf(firstValue)
@@ -33,6 +46,16 @@ public object StdLib : ConstraintLibrary {
         }
     }
 
+    /**
+     * Creates a comparability constraint.
+     * [cmp] is a constraint constructor.
+     * Comparability means that [firstValue] compareTo [secondValue] == [compareValue].
+     *
+     * @param firstValue first value in the constraint
+     * @param secondValue second value in the constraint
+     * @param compareValue provided [compareTo] result value to match
+     * @return comparability constraint
+     * */
     public fun cmp(firstValue: Value, secondValue: Value, compareValue: Int): Goal {
         return Constraint.create(::cmp, firstValue, secondValue, compareValue) { state ->
             val valueOfFirst = state.valueOf(firstValue)
@@ -54,10 +77,22 @@ public object StdLib : ConstraintLibrary {
         }
     }
 
+    /**
+     * Creates an in set constraint.
+     * [inSet] is a constraint constructor.
+     * In set constrains means that the provided variable has separately the provided set of values.
+     *
+     * @param variable provided variable
+     * @param values provided set of values
+     * @return in set constraint
+     * */
     public fun inSet(variable: Variable, values: Set<Value>): Goal {
         return Constraint.or(values.map { Constraint.eq(variable, it) }.toList())
     }
 
+    /**
+     * Internal function that you don't need to use.
+     * */
     override fun exportConstraints(): ConstraintRegistry {
         return registerConstraints(::notEq, ::cmp)
     }

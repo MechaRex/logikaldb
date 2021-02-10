@@ -18,24 +18,58 @@ package com.logikaldb
 
 import com.logikaldb.converter.ConstraintConverter
 
+/**
+ * Constraint library interface used for creating custom constraint libraries.
+ * */
 public interface ConstraintLibrary {
 
+    /**
+     * Gives back a constraint registry that contains the provided custom constraint functions.
+     * You should only use it in the overridden [exportConstraints] function.
+     *
+     * @param constraintFuns provided custom constraint functions
+     * @return constraint registry
+     * */
     public fun registerConstraints(constraintFuns: List<ConstraintFun>): ConstraintRegistry {
         return constraintFuns.map { ConstraintConverter.convertToConstraintName(it) to it }.toMap()
     }
 
+    /**
+     * Gives back a constraint registry that contains the provided custom constraint functions.
+     * You should only use it in the overridden [exportConstraints] function.
+     *
+     * @param constraintFuns provided custom constraint functions
+     * @return constraint registry
+     * */
     public fun registerConstraints(vararg constraintFuns: ConstraintFun): ConstraintRegistry {
         return registerConstraints(constraintFuns.toList())
     }
 
+    /**
+     * Gives back a constraint registry that contains the provided custom constraint libraries.
+     * You should only use it in the overridden [exportConstraints] function.
+     *
+     * @param constraintLibraries provided custom constraint libraries
+     * @return constraint registry
+     * */
     public fun registerConstraintLibraries(constraintLibraries: List<ConstraintLibrary>): ConstraintRegistry {
         return constraintLibraries.map { it.exportConstraints() }.reduce(::mergeConstraintRegistry)
     }
 
+    /**
+     * Gives back a constraint registry that contains the provided custom constraint libraries.
+     * You should only use it in the overridden [exportConstraints] function.
+     *
+     * @param constraintLibraries provided custom constraint libraries
+     * @return constraint registry
+     * */
     public fun registerConstraintLibraries(vararg constraintLibraries: ConstraintLibrary): ConstraintRegistry {
         return registerConstraintLibraries(constraintLibraries.toList())
     }
 
+    /**
+     * You need to implement this function by calling the different register constraint functions in it.
+     * */
     public fun exportConstraints(): ConstraintRegistry
 
     private fun mergeConstraintRegistry(first: ConstraintRegistry, second: ConstraintRegistry): ConstraintRegistry {

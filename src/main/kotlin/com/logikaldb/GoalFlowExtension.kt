@@ -25,38 +25,94 @@ import kotlinx.coroutines.flow.flattenMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 
+/**
+ * And combines together the provided flow of results.
+ *
+ * @param goals provided flow of results
+ * @return and combined result flow
+ * */
 public fun Flow<Goal>.and(goals: List<Goal>): Flow<Goal> {
     return this.map { Constraint.and(listOf(it) + goals) }
 }
 
+/**
+ * And combines together the provided flow of results.
+ *
+ * @param goals provided flow of results
+ * @return and combined result flow
+ * */
 public fun Flow<Goal>.and(vararg goals: Goal): Flow<Goal> {
     return this.and(goals.toList())
 }
 
+/**
+ * Or combines together the provided flow of results.
+ *
+ * @param goals provided flow of results
+ * @return or combined result flow
+ * */
 public fun Flow<Goal>.or(goals: List<Goal>): Flow<Goal> {
     return this.map { Constraint.or(listOf(it) + goals) }
 }
 
+/**
+ * Or combines together the provided flow of results.
+ *
+ * @param goals provided flow of results
+ * @return or combined result flow
+ * */
 public fun Flow<Goal>.or(vararg goals: Goal): Flow<Goal> {
     return this.or(goals.toList())
 }
 
+/**
+ * Selects variables from the flow of results based on the provided query engine and variables.
+ * This is a terminal operation.
+ *
+ * @param queryEngine provided query engine
+ * @param selectedVariables provided variables that you are interested in
+ * @return list of variable values that we are interested in
+ * */
 public suspend fun Flow<Goal>.selectBy(queryEngine: LogikalDB, selectedVariables: List<Variable>): List<Result> {
     return this.map { queryEngine.run(it) }
         .flattenMerge().filterNotNull()
         .map { it.valuesOf(selectedVariables) }.toList()
 }
 
+/**
+ * Selects variables from the flow of results based on the provided query engine and variables.
+ * This is a terminal operation.
+ *
+ * @param queryEngine provided query engine
+ * @param selectedVariables provided variables that you are interested in
+ * @return list of variable values that we are interested in
+ * */
 public suspend fun Flow<Goal>.selectBy(queryEngine: LogikalDB, vararg selectedVariables: Variable): List<Result> {
     return this.selectBy(queryEngine, selectedVariables.toList())
 }
 
+/**
+ * Selects variables from the flow of results based on the provided query engine and variables.
+ * Non-terminal version of [selectBy].
+ *
+ * @param queryEngine provided query engine
+ * @param selectedVariables provided variables that you are interested in
+ * @return flow of variable values that we are interested in
+ * */
 public fun Flow<Goal>.selectFlowBy(queryEngine: LogikalDB, selectedVariables: List<Variable>): Flow<Result> {
     return this.map { queryEngine.run(it) }
         .flattenMerge().filterNotNull()
         .map { it.valuesOf(selectedVariables) }
 }
 
+/**
+ * Selects variables from the flow of results based on the provided query engine and variables.
+ * Non-terminal version of [selectBy].
+ *
+ * @param queryEngine provided query engine
+ * @param selectedVariables provided variables that you are interested in
+ * @return flow of variable values that we are interested in
+ * */
 public fun Flow<Goal>.selectFlowBy(queryEngine: LogikalDB, vararg selectedVariables: Variable): Flow<Result> {
     return this.selectFlowBy(queryEngine, selectedVariables.toList())
 }
@@ -69,6 +125,13 @@ private fun Flow<Goal>.join(joinGoal: Goal, otherGoalFlow: Flow<Goal>): Flow<Goa
     }.flattenMerge()
 }
 
+/**
+ * Joins multiple result flows together based on a provided join constraint.
+ *
+ * @param joinGoal provided join constraint
+ * @param otherGoalFlows result flows
+ * @return joined flow of results
+ * */
 public fun Flow<Goal>.join(joinGoal: Goal, otherGoalFlows: List<Flow<Goal>>): Flow<Goal> {
     val joinedGoalFlow = this.map { Constraint.and(it, joinGoal) }
     return otherGoalFlows.fold(joinedGoalFlow) { accGoalFlow, currGoalFlow ->
@@ -76,6 +139,13 @@ public fun Flow<Goal>.join(joinGoal: Goal, otherGoalFlows: List<Flow<Goal>>): Fl
     }
 }
 
+/**
+ * Joins multiple result flows together based on a provided join constraint.
+ *
+ * @param joinGoal provided join constraint
+ * @param otherGoalFlows result flows
+ * @return joined flow of results
+ * */
 public fun Flow<Goal>.join(joinGoal: Goal, vararg otherGoalFlows: Flow<Goal>): Flow<Goal> {
     return this.join(joinGoal, otherGoalFlows.toList())
 }

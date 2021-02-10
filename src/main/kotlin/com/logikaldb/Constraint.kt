@@ -16,6 +16,8 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb
 
+import com.logikaldb.Constraint.and
+import com.logikaldb.Constraint.or
 import com.logikaldb.converter.ConstraintConverter
 import com.logikaldb.converter.ValueConverter
 import com.logikaldb.entity.AndEntity
@@ -29,18 +31,46 @@ import com.logikaldb.logikal.Variable
 import com.logikaldb.logikal.VariableConstraint
 import com.logikaldb.logikal.VariableName
 
+/**
+ * Constraint object's responsibility is to handle every kind of constraint creation.
+ * */
 public object Constraint {
 
+    /**
+     * Creates a logical variable.
+     *
+     * @param variableName name of the variable
+     * @return logical variable
+     * */
     public fun vr(variableName: VariableName): Variable {
         return Variable(variableName)
     }
 
+    /**
+     * Creates an equality constraint between the firstValue and the secondValue.
+     * [eq] is a constraint constructor.
+     * Equality means that [firstValue] == [secondValue] and [secondValue] == [firstValue].
+     *
+     * @param firstValue first value in the constraint
+     * @param secondValue second value in the constraint
+     * @return equality constraint
+     * */
     public fun eq(firstValue: Value, secondValue: Value): Goal {
         val firstValueEntity = ValueConverter.convertToValueEntity(firstValue)
         val secondValueEntity = ValueConverter.convertToValueEntity(secondValue)
         return EqualEntity(firstValueEntity, secondValueEntity)
     }
 
+    /**
+     * Creates a custom constraint with it's own custom logic.
+     * [create] is a constraint constructor.
+     * Custom logic needs to follow the [VariableConstraint] functional interface, which is basically a state filter: (State) -> State?.
+     *
+     * @param constraintReference function reference of the created custom constraint
+     * @param parameterValues values used in the custom constraint
+     * @param constraintFun implementation of the custom constraint
+     * @return custom constraint
+     * */
     public fun create(
         constraintReference: ConstraintFun,
         parameterValues: List<Value>,
@@ -53,26 +83,68 @@ public object Constraint {
         return ConstraintEntity(constraintName, parameterEntities, constraintGoal)
     }
 
+    /**
+     * Creates a custom constraint with it's own custom logic.
+     * [create] is a constraint constructor.
+     * Custom logic needs to follow the [VariableConstraint] functional interface, which is basically a state filter: (State) -> State?.
+     *
+     * @param constraintReference function reference of the created custom constraint
+     * @param parameterValues values used in the custom constraint
+     * @param constraintFun implementation of the custom constraint
+     * @return custom constraint
+     * */
     public fun create(
-        constraintFun: ConstraintFun,
+        constraintReference: ConstraintFun,
         vararg parameterValues: Value,
-        variableConstraint: VariableConstraint
+        constraintFun: VariableConstraint
     ): Goal {
-        return create(constraintFun, parameterValues.toList(), variableConstraint)
+        return create(constraintReference, parameterValues.toList(), constraintFun)
     }
 
+    /**
+     * Creates an and constraint.
+     * [and] is a constraint combinator.
+     * And means that every constraint in it will need to be true at the same time.
+     *
+     * @param goals list of constraints that will be combined
+     * @return and constraint
+     * */
     public fun and(goals: List<Goal>): Goal {
         return AndEntity(goals)
     }
 
+    /**
+     * Creates an and constraint.
+     * [and] is a constraint combinator.
+     * And means that every constraint in it will need to be true at the same time.
+     *
+     * @param goals list of constraints that will be combined
+     * @return and constraint
+     * */
     public fun and(vararg goals: Goal): Goal {
         return AndEntity(goals.toList())
     }
 
+    /**
+     * Create an or constraint.
+     * [or] is a constraint combinator.
+     * Or means that every constraint separately can be true.
+     *
+     * @param goals list of constraints that will be combined
+     * @return or constraint
+     * */
     public fun or(goals: List<Goal>): Goal {
         return OrEntity(goals)
     }
 
+    /**
+     * Create an or constraint.
+     * [or] is a constraint combinator.
+     * Or means that every constraint separately can be true.
+     *
+     * @param goals list of constraints that will be combined
+     * @return or constraint
+     * */
     public fun or(vararg goals: Goal): Goal {
         return OrEntity(goals.toList())
     }
