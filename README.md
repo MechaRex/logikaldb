@@ -12,8 +12,7 @@ Foundational reactive logical database
 
 ## Getting started
 1. Install [FoubndationDB client and server](https://www.foundationdb.org/download/)
-2. Include LogikalDB as a gradle source dependency (or just clone and use this repository)
-3. Try running [some examples in the repository](https://github.com/MechaRex/logikaldb/tree/master/src/main/kotlin/com/logikaldb/examples)
+2. Try out the [examples](https://github.com/MechaRex/logikaldb-examples)
 
 ## Quick example
 ```kotlin
@@ -41,7 +40,7 @@ logikalDB.read(listOf("example", "quick"), "pokemon")
 ```
 This quick example shows the basic principles behind LogikalDB, which is to use basic logical operators to describe and query our dataset.\
 You can also see that LogikalDB is a folder path based key-value database. For example in this case the folder path is `/example/quick` and the key is `pokemon`.\
-Please look into the [examples](https://github.com/MechaRex/logikaldb/tree/master/src/main/kotlin/com/logikaldb/examples) folder if you want to see more complex examples.
+Please look into the [examples](https://github.com/MechaRex/logikaldb-examples) for more complex examples.
 
 ## Building blocks of LogikalDB
 LogikalDB basically built up by three big components:
