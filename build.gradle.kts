@@ -16,6 +16,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.4.20"
     id("maven-publish")
     id("signing")
+    id("java-library")
     idea
 }
 
@@ -29,11 +30,11 @@ repositories {
 }
 
 dependencies {
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlinxVersion")
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("script-runtime"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$kotlinxVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:$jacksonVersion")
     implementation("org.foundationdb:fdb-java:$foundationDBVersion")
