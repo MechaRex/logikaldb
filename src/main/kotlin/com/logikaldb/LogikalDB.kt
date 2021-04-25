@@ -61,10 +61,11 @@ public class LogikalDB(constraintLibraries: List<ConstraintLibrary>, fdbVersion:
      * @param key key of the value in the database
      * @return value flow from the database
      * */
-    public fun read(directoryPath: List<String>, key: String): Flow<Goal> {
+    public fun read(directoryPath: List<String>, key: String): Query {
         val serializedValueFlow = databaseHandler.read(directoryPath, key)
         val goalEntityFlow = serializedValueFlow.filterNotNull().map(entitySerializer::deserialize)
-        return goalEntityFlow.map { it.goal }
+        val goalFlow = goalEntityFlow.map { it.goal }
+        return Query(this, goalFlow)
     }
 
     /**
