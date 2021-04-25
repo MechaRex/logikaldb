@@ -18,25 +18,28 @@ Foundational reactive logical database
 ```kotlin
 val logikalDB = LogikalDB()
 
+val pokemonName = vr("name")
+val pokemonType = vr("type")
+
 val dataset = or(
-   and(eq(vr("name"), "Bulbasaur"), eq(vr("type"), "Grass")),
-   and(eq(vr("name"), "Charmander"), eq(vr("type"), "Fire")),
-   and(eq(vr("name"), "Squirtle"), eq(vr("type"), "Water")),
-   and(eq(vr("name"), "Vulpix"), eq(vr("type"), "Fire"))
+   and(eq(pokemonName, "Bulbasaur"), eq(pokemonType, "Grass")),
+   and(eq(pokemonName, "Charmander"), eq(pokemonType, "Fire")),
+   and(eq(pokemonName, "Squirtle"), eq(pokemonType, "Water")),
+   and(eq(pokemonName, "Vulpix"), eq(pokemonType, "Fire"))
 )
-val query = eq(vr("type"), "Fire")
+val query = eq(pokemonType, "Fire")
 
 // Write the dataset to the database
 logikalDB.write(listOf("example", "quick"), "pokemon", dataset)
 
-// Query the pokemon, which type is fire and finally print out the results
+// Query the pokemon, which type is fire and finally print out the name of the found pokemons
 logikalDB.read(listOf("example", "quick"), "pokemon")
    .and(query)
-   .selectBy(logikalDB)
+   .select(pokemonName)
    .forEach { println("Result: $it") }
 
-// Result: {Variable(variableName=type)=Fire, Variable(variableName=name)=Vulpix}
-// Result: {Variable(variableName=type)=Fire, Variable(variableName=name)=Charmander}
+// Result: {Variable(variableName=name)=Vulpix}
+// Result: {Variable(variableName=name)=Charmander}
 ```
 This quick example shows the basic principles behind LogikalDB, which is to use basic logical operators to describe and query our dataset.\
 You can also see that LogikalDB is a folder path based key-value database. For example in this case the folder path is `/example/quick` and the key is `pokemon`.\
@@ -115,13 +118,14 @@ LogikalDB supports the following operations for now:
 1. `write(directoryPath: List<String>, key: String, value: Goal): Unit`: 
    - Creates a value in the specified directory under the specified key
    - For example: `write(listof("logikaldb","examples"), "intro", eq(vr("example"), "Hello World!"))` creates a `example="Hello World!"` value under the `intro` key in the `logikaldb/examples` directory
-2. `read(directoryPath: List<String>, key: String): Flow<Goal>`:
+2. `read(directoryPath: List<String>, key: String): Query`:
    - Reads out lazily the value from the database in the specified directory and key location
-   - Flow is the built-in asynchronous data stream in Kotlin that we are using throughout LogikalDB to make the database reactive. You can learn more about it here: https://kotlinlang.org/docs/reference/coroutines/flow.html
-   - For example: `read(listof("logikaldb","examples"), "intro")` will instantly return us a Flow and this Flow will be able to run our database operation and return the value from the database
+   - Query is a lazy query builder that you can refine with more constraints. Internally Query uses [Flow](https://kotlinlang.org/docs/reference/coroutines/flow.html) to make Query lazy and also a reactive stream.
+   - For example: `read(listof("logikaldb","examples"), "intro")` will instantly return a Query that will give back the results in `/logikaldb/examples/intro` when executed.
 
 ## Querying
-In LogikalDB querying is about finding data with constraints that we introduce previously in the logical programming section. We basically do the querying by adding more constraints to the data, which in turn makes the data more specialized.
+In LogikalDB querying is about finding data with constraints that we introduce previously in the logical programming section. 
+We basically do the querying by adding more constraints to the data, which in turn makes the data more specialized.
 Another interesting thing about LogikalDB queries is that they are based on lazy streams(flow), which means that:
 - they are only run, when we want them to and
 - we can alo easily compose them into bigger queries.
@@ -135,17 +139,18 @@ val secondQueryConstraint = and(secondQueryConstraintFirstPart, secondQueryConst
 
 logikalDB.read(listOf("logikaldb"), "key") // getting the data from the db
    .and(firstQueryConstraint, secondQueryConstraint) // query the data based on the two query constraints
-   .selectBy(logikalDB) // run the query on the data
+   .select() // run the query and return every variable's value
    .forEach { println("Result: $it") } // print out the results
 ```
-In this example at first we read out the data, but remember that it only returns instantly a flow, so nothing really happens. 
-The flow and everything attached to it is only run when we call the `selectBy` terminal operation at the end. 
-Until we call `selectBy`, we are basically just building up our database query.
+In this example at first we read out the data, but remember that it only returns instantly a Query, so nothing really happens. 
+The Query is only run when we call the `select` terminal operation at the end. 
+Until we call `select`, we are basically just building up our database query.
 
-Another interesting thing about the LogikalDB queries is that we can also store them in tha database as LogikalDB has an unified data model.
+Another option is using `selectBy` which will return instantly a flow of variable values. 
+It will be executed when a terminal operation is run on the flow.
 
 ## Joining
-Joining in LogikalDB is basically about combining two or multiple data flows based on a join constraint.
+Joining in LogikalDB is basically about combining multiple queries based on a join constraint.
 ```kotlin
 // Read out the data (flow) from the database
 val employees = logikalDB.read(listOf("example", "join"), "employee")
@@ -156,7 +161,7 @@ val joinGoal = eq(empDepartment, depDepartmentName)
 
 // Run the join query and print out the results
 employees.join(joinGoal, departments)
-   .selectBy(logikalDB)
+   .select()
    .forEach { println("Result by joining two tables: $it") }
 ```
 In this example you can see that we are joining together the employees and departments tables based on the join constraint.
