@@ -7,9 +7,6 @@ val logikaldbGroupId: String by project
 val logikaldbArtifactId: String by project
 val logikaldbVersion: String by project
 
-val ossrhUsername: String by project
-val ossrhPassword: String by project
-
 plugins {
     kotlin("jvm") version "1.4.10"
     id("org.jmailen.kotlinter") version "3.2.0"
@@ -17,6 +14,7 @@ plugins {
     id("maven-publish")
     id("signing")
     id("java-library")
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     idea
 }
 
@@ -90,19 +88,14 @@ publishing {
             }
         }
     }
+}
+
+nexusPublishing {
     repositories {
-        maven {
-            name = "sonatype"
-            val releasesRepoUrl = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            val snapshotsRepoUrl = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
-            }
-        }
+        sonatype()
     }
 }
+
 signing {
     sign(publishing.publications)
 }
