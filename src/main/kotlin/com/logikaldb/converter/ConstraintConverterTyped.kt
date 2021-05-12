@@ -14,16 +14,13 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
-package com.logikaldb.logikal
+package com.logikaldb.converter
 
-import kotlinx.coroutines.flow.Flow
+import com.logikaldb.ConstraintFunTyped
+import com.logikaldb.ConstraintName
 
-public typealias Value = Any
-public typealias VariableName = String
-public data class Variable(val variableName: VariableName)
-public data class VariableTyped<T>(val variableName: VariableName, val variableType: Class<T>)
-public typealias VariableConstraint = (State) -> State?
-public typealias VariableConstraintTyped = (StateTyped) -> StateTyped?
-public typealias Result = Map<Variable, Value>
-internal typealias Goal = (State) -> Flow<State?>
-internal typealias GoalTyped = (StateTyped) -> Flow<StateTyped?>
+internal object ConstraintConverterTyped {
+    fun convertToConstraintName(constraintFun: ConstraintFunTyped): ConstraintName {
+        return "$constraintFun"
+    }
+}

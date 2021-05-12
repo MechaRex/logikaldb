@@ -14,16 +14,22 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
-package com.logikaldb.logikal
+package com.logikaldb.serializer
 
-import kotlinx.coroutines.flow.Flow
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.logikaldb.entity.GoalTypedEntity
 
-public typealias Value = Any
-public typealias VariableName = String
-public data class Variable(val variableName: VariableName)
-public data class VariableTyped<T>(val variableName: VariableName, val variableType: Class<T>)
-public typealias VariableConstraint = (State) -> State?
-public typealias VariableConstraintTyped = (StateTyped) -> StateTyped?
-public typealias Result = Map<Variable, Value>
-internal typealias Goal = (State) -> Flow<State?>
-internal typealias GoalTyped = (StateTyped) -> Flow<StateTyped?>
+internal class EntityTypedSerializer {
+    private val cbor = CBORFactory()
+    private val mapper = ObjectMapper(cbor).registerKotlinModule()
+
+    fun serialize(goalEntity: GoalTypedEntity): ByteArray {
+        return mapper.writeValueAsBytes(goalEntity)
+    }
+
+    fun deserialize(entity: ByteArray): GoalTypedEntity {
+        return mapper.readValue(entity, GoalTypedEntity::class.java)!!
+    }
+}
