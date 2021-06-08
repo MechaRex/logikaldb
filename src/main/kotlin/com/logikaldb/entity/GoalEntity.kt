@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.logikaldb.ConstraintName
+import com.logikaldb.logikal.GoalFun
 import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.VariableName
 
@@ -32,7 +33,7 @@ internal sealed class ValueTypeEntity
 internal data class ValueEntity(val value: Value) : ValueTypeEntity()
 
 @JsonTypeName("variable")
-internal data class VariableEntity(val variableName: VariableName) : ValueTypeEntity()
+internal data class VariableEntity(val variableName: VariableName, val variableType: Class<*>) : ValueTypeEntity()
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 public sealed class Goal
@@ -50,5 +51,5 @@ internal data class OrEntity(val goals: List<Goal>) : Goal()
 internal data class ConstraintEntity(
     val constraintName: ConstraintName,
     val parameters: List<ValueTypeEntity>,
-    @JsonIgnore val constraintGoal: com.logikaldb.logikal.Goal?
+    @JsonIgnore val constraintGoal: GoalFun?
 ) : Goal()

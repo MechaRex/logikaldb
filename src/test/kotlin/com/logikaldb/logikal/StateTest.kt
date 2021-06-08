@@ -25,7 +25,7 @@ import java.math.BigDecimal
 
 class StateTest : StringSpec({
     "addConstraint adds a constraint to an empty constraint map" {
-        val variable = Variable("variable")
+        val variable = Variable("variable", String::class.java)
         val variableConstraint = { state: State -> state }
         val underTest = State()
 
@@ -36,7 +36,7 @@ class StateTest : StringSpec({
     }
 
     "addConstraint adds a constraint to an non-empty constraint map" {
-        val variable = Variable("variable")
+        val variable = Variable("variable", String::class.java)
         val variableConstraint = { state: State -> state }
         val underTest = State(constraintMap = mapOf(variable to listOf(variableConstraint)))
 
@@ -55,9 +55,16 @@ class StateTest : StringSpec({
     }
 
     "unify gives back the input state if the two variable's value is the same" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val underTest = State(valueMap = mapOf(firstVariable to 1, secondVariable to 1))
+        val firstVariable = Variable("firstVariable", Integer::class.java)
+        val secondVariable = Variable("secondVariable", Integer::class.java)
+        val underTest = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to 1,
+                    secondVariable to 1
+                )
+            )
+        )
 
         val result = underTest.unify(firstVariable, secondVariable)
 
@@ -65,9 +72,16 @@ class StateTest : StringSpec({
     }
 
     "unify gives back the input state if the two variable's object value is the same" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val underTest = State(valueMap = mapOf(firstVariable to BigDecimal(1), secondVariable to BigDecimal(1)))
+        val firstVariable = Variable("firstVariable", BigDecimal::class.java)
+        val secondVariable = Variable("secondVariable", BigDecimal::class.java)
+        val underTest = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to BigDecimal(1),
+                    secondVariable to BigDecimal(1)
+                )
+            )
+        )
 
         val result = underTest.unify(firstVariable, secondVariable)
 
@@ -75,8 +89,8 @@ class StateTest : StringSpec({
     }
 
     "unify adds the new variable to the value map" {
-        val variable = Variable("variable")
-        val expectedResult = State(valueMap = mapOf(variable to 1))
+        val variable = Variable("variable", Integer::class.java)
+        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)))
         val underTest = State()
 
         val result = underTest.unify(variable, 1)
@@ -85,8 +99,8 @@ class StateTest : StringSpec({
     }
 
     "unify adds the new variable to the value map the other way" {
-        val variable = Variable("variable")
-        val expectedResult = State(valueMap = mapOf(variable to 1))
+        val variable = Variable("variable", Integer::class.java)
+        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)))
         val underTest = State()
 
         val result = underTest.unify(1, variable)
@@ -95,9 +109,16 @@ class StateTest : StringSpec({
     }
 
     "unify creates two equal empty variables and then assign the value to the second variable through the first variable" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val expectedResult = State(valueMap = mapOf(firstVariable to secondVariable, secondVariable to 1))
+        val firstVariable = Variable("firstVariable", Integer::class.java)
+        val secondVariable = Variable("secondVariable", Integer::class.java)
+        val expectedResult = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to secondVariable,
+                    secondVariable to 1
+                )
+            )
+        )
         val underTest = State()
 
         val result = underTest.unify(firstVariable, secondVariable)?.unify(firstVariable, 1)
@@ -106,9 +127,16 @@ class StateTest : StringSpec({
     }
 
     "unify creates two equal empty variables and then assign the value to the second variable" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val expectedResult = State(valueMap = mapOf(firstVariable to secondVariable, secondVariable to 1))
+        val firstVariable = Variable("firstVariable", Integer::class.java)
+        val secondVariable = Variable("secondVariable", Integer::class.java)
+        val expectedResult = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to secondVariable,
+                    secondVariable to 1
+                )
+            )
+        )
         val underTest = State()
 
         val result = underTest.unify(firstVariable, secondVariable)?.unify(secondVariable, 1)
@@ -117,9 +145,16 @@ class StateTest : StringSpec({
     }
 
     "unify creates a first variable with a value and then assign it to the second variable" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val expectedResult = State(valueMap = mapOf(firstVariable to 1, secondVariable to 1))
+        val firstVariable = Variable("firstVariable", Integer::class.java)
+        val secondVariable = Variable("secondVariable", Integer::class.java)
+        val expectedResult = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to 1,
+                    secondVariable to 1
+                )
+            )
+        )
         val underTest = State()
 
         val result = underTest.unify(firstVariable, 1)?.unify(firstVariable, secondVariable)
@@ -128,9 +163,16 @@ class StateTest : StringSpec({
     }
 
     "unify creates a first variable with a value and then reverse assign it to the second variable" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val expectedResult = State(valueMap = mapOf(firstVariable to 1, secondVariable to 1))
+        val firstVariable = Variable("firstVariable", Integer::class.java)
+        val secondVariable = Variable("secondVariable", Integer::class.java)
+        val expectedResult = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to 1,
+                    secondVariable to 1
+                )
+            )
+        )
         val underTest = State()
 
         val result = underTest.unify(firstVariable, 1)?.unify(secondVariable, firstVariable)
@@ -139,9 +181,9 @@ class StateTest : StringSpec({
     }
 
     "unify adds the new variable to the value map with matching id constraint" {
-        val variable = Variable("variable")
+        val variable = Variable("variable", Integer::class.java)
         val variableConstraint = { state: State -> state }
-        val expectedResult = State(valueMap = mapOf(variable to 1), constraintMap = mapOf(variable to listOf(variableConstraint)))
+        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)), constraintMap = mapOf(variable to listOf(variableConstraint)))
         val underTest = State(constraintMap = mapOf(variable to listOf(variableConstraint)))
 
         val result = underTest.unify(variable, 1)
@@ -150,9 +192,9 @@ class StateTest : StringSpec({
     }
 
     "unify adds the new variable to the value map with matching custom constraint" {
-        val variable = Variable("variable")
-        val variableConstraint = { _: State -> State(valueMap = mapOf(variable to 2)) }
-        val expectedResult = State(valueMap = mapOf(variable to 2))
+        val variable = Variable("variable", Integer::class.java)
+        val variableConstraint = { _: State -> State(valueMap = VariableMap(mapOf(variable to 2))) }
+        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 2)))
         val underTest = State(constraintMap = mapOf(variable to listOf(variableConstraint)))
 
         val result = underTest.unify(variable, 1)
@@ -161,10 +203,10 @@ class StateTest : StringSpec({
     }
 
     "unify adds the new variable to the value map with non-matching constraint" {
-        val variable = Variable("variable")
-        val nonMatchingVariable = Variable("nonMatchingVariable")
-        val variableConstraint = { _: State -> State(valueMap = mapOf(variable to 2)) }
-        val expectedResult = State(valueMap = mapOf(variable to 1), constraintMap = mapOf(nonMatchingVariable to listOf(variableConstraint)))
+        val variable = Variable("variable", Integer::class.java)
+        val nonMatchingVariable = Variable("nonMatchingVariable", Integer::class.java)
+        val variableConstraint = { _: State -> State(valueMap = VariableMap(mapOf(variable to 2))) }
+        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)), constraintMap = mapOf(nonMatchingVariable to listOf(variableConstraint)))
         val underTest = State(constraintMap = mapOf(nonMatchingVariable to listOf(variableConstraint)))
 
         val result = underTest.unify(variable, 1)
@@ -181,9 +223,16 @@ class StateTest : StringSpec({
     }
 
     "unify gives back null if the two variable's value is different" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val underTest = State(valueMap = mapOf(firstVariable to 1, secondVariable to 2))
+        val firstVariable = Variable("firstVariable", Integer::class.java)
+        val secondVariable = Variable("secondVariable", Integer::class.java)
+        val underTest = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to 1,
+                    secondVariable to 2
+                )
+            )
+        )
 
         val result = underTest.unify(firstVariable, secondVariable)
 
@@ -191,9 +240,16 @@ class StateTest : StringSpec({
     }
 
     "unify gives back null if the two variable's value and type is different" {
-        val firstVariable = Variable("firstVariable")
-        val secondVariable = Variable("secondVariable")
-        val underTest = State(valueMap = mapOf(firstVariable to "1", secondVariable to BigDecimal(2)))
+        val firstVariable = Variable("firstVariable", String::class.java)
+        val secondVariable = Variable("secondVariable", BigDecimal::class.java)
+        val underTest = State(
+            valueMap = VariableMap(
+                mapOf(
+                    firstVariable to "1",
+                    secondVariable to BigDecimal(2)
+                )
+            )
+        )
 
         val result = underTest.unify(firstVariable, secondVariable)
 

@@ -40,7 +40,7 @@ class EntitySerializerTest : StringSpec({
     val underTest = EntitySerializer()
 
     fun createEqualEntity(randomPair: Pair<Sample<String>, Sample<Any>>): EqualEntity {
-        return EqualEntity(VariableEntity(randomPair.first.value), ValueEntity(randomPair.second.value))
+        return EqualEntity(VariableEntity(randomPair.first.value, String::class.java), ValueEntity(randomPair.second.value))
     }
 
     fun anyRandomValues(randomSource: RandomSource): Sequence<Sample<Any>> {
@@ -67,7 +67,7 @@ class EntitySerializerTest : StringSpec({
         val constraintGoalEntityArb = arb { randomSource ->
             val randomConstraints = Arb.string().values(randomSource)
             val randomParameters = Arb.list(Arb.string())
-                .map { parameterNames -> parameterNames.map { VariableEntity(it) } }
+                .map { parameterNames -> parameterNames.map { VariableEntity(it, String::class.java) } }
                 .values(randomSource)
             randomConstraints.zip(randomParameters)
                 .map { ConstraintEntity(it.first.value, it.second.value, null) }
@@ -82,7 +82,7 @@ class EntitySerializerTest : StringSpec({
         val constraintGoalEntityArb = arb { randomSource ->
             val randomConstraints = Arb.string().values(randomSource)
             val randomParameters = Arb.list(Arb.string())
-                .map { parameterNames -> parameterNames.map { VariableEntity(it) } }
+                .map { parameterNames -> parameterNames.map { VariableEntity(it, String::class.java) } }
                 .values(randomSource)
             randomConstraints.zip(randomParameters)
                 .map { ConstraintEntity(it.first.value, it.second.value, equal(1, 1)) }

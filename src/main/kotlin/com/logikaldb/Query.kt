@@ -1,8 +1,24 @@
+/*Copyright 2021 Mecharex Kft.
+This file is part of the logikaldb library.
+
+The logikaldb library is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+The logikaldb library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
+
 package com.logikaldb
 
 import com.logikaldb.entity.Goal
-import com.logikaldb.logikal.Result
 import com.logikaldb.logikal.Variable
+import com.logikaldb.logikal.VariableMap
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flattenMerge
@@ -111,7 +127,7 @@ public class Query(private val logikalDB: LogikalDB, private var goalFlow: Flow<
      * @param selectedVariables provided variables that you are interested in
      * @return list of variable values that we are interested in
      * */
-    public suspend fun select(selectedVariables: List<Variable>): List<Result> {
+    public suspend fun select(selectedVariables: List<Variable<*>>): List<VariableMap> {
         return this.goalFlow.map { logikalDB.run(it) }
             .flattenMerge().filterNotNull()
             .map { it.valuesOf(selectedVariables) }.toList()
@@ -124,7 +140,7 @@ public class Query(private val logikalDB: LogikalDB, private var goalFlow: Flow<
      * @param selectedVariables provided variables that you are interested in
      * @return list of variable values that we are interested in
      * */
-    public suspend fun select(vararg selectedVariables: Variable): List<Result> {
+    public suspend fun select(vararg selectedVariables: Variable<*>): List<VariableMap> {
         return this.select(selectedVariables.toList())
     }
 
@@ -135,7 +151,7 @@ public class Query(private val logikalDB: LogikalDB, private var goalFlow: Flow<
      * @param selectedVariables provided variables that you are interested in
      * @return flow of variable values that we are interested in
      * */
-    public fun selectFlow(selectedVariables: List<Variable>): Flow<Result> {
+    public fun selectFlow(selectedVariables: List<Variable<*>>): Flow<VariableMap> {
         return this.goalFlow.map { logikalDB.run(it) }
             .flattenMerge().filterNotNull()
             .map { it.valuesOf(selectedVariables) }
@@ -148,7 +164,7 @@ public class Query(private val logikalDB: LogikalDB, private var goalFlow: Flow<
      * @param selectedVariables provided variables that you are interested in
      * @return flow of variable values that we are interested in
      * */
-    public fun selectFlow(vararg selectedVariables: Variable): Flow<Result> {
+    public fun selectFlow(vararg selectedVariables: Variable<*>): Flow<VariableMap> {
         return selectFlow(selectedVariables.toList())
     }
 }

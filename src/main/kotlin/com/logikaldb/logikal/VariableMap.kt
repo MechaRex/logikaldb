@@ -16,27 +16,27 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.logikal
 
-public data class VariableTypedMap(private val variableValueMap: Map<VariableTyped<*>, Any> = mapOf()) {
+public data class VariableMap(private val variableValueMap: Map<Variable<*>, Any> = mapOf()) {
 
-    public tailrec fun <T> valueOf(variable: VariableTyped<T>): T? {
+    public tailrec fun <T> valueOf(variable: Variable<T>): T? {
         val value = variableValueMap[variable]
-        return if (value != null && value is VariableTyped<*>) {
-            valueOf(value as VariableTyped<T>)
+        return if (value != null && value is Variable<*>) {
+            valueOf(value as Variable<T>)
         } else {
             value as T?
         }
     }
 
-    public fun <T> hasValue(variable: VariableTyped<T>): Boolean {
+    public fun <T> hasValue(variable: Variable<T>): Boolean {
         val value = valueOf(variable)
-        return value !is VariableTyped<*> && value != null
+        return value !is Variable<*> && value != null
     }
 
-    internal fun keys(): Set<VariableTyped<*>> {
+    internal fun keys(): Set<Variable<*>> {
         return variableValueMap.keys
     }
 
-    internal fun plus(variableValuePair: Pair<VariableTyped<*>, Any>): VariableTypedMap {
-        return VariableTypedMap(variableValueMap + variableValuePair)
+    internal fun plus(variableValuePair: Pair<Variable<*>, Any>): VariableMap {
+        return VariableMap(variableValueMap + variableValuePair)
     }
 }

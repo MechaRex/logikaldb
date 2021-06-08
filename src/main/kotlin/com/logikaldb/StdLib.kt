@@ -36,8 +36,8 @@ public object StdLib : ConstraintLibrary {
      * */
     public fun notEq(firstValue: Value, secondValue: Value): Goal {
         return Constraint.create(::notEq, firstValue, secondValue) { state ->
-            val valueOfFirst = state.valueOf(firstValue)
-            val valueOfSecond = state.valueOf(secondValue)
+            val valueOfFirst = state.dynamicValueOf(firstValue)
+            val valueOfSecond = state.dynamicValueOf(secondValue)
             if (valueOfFirst == valueOfSecond) {
                 null
             } else {
@@ -58,8 +58,8 @@ public object StdLib : ConstraintLibrary {
      * */
     public fun cmp(firstValue: Value, secondValue: Value, compareValue: Int): Goal {
         return Constraint.create(::cmp, firstValue, secondValue, compareValue) { state ->
-            val valueOfFirst = state.valueOf(firstValue)
-            val valueOfSecond = state.valueOf(secondValue)
+            val valueOfFirst = state.dynamicValueOf(firstValue)
+            val valueOfSecond = state.dynamicValueOf(secondValue)
 
             if (valueOfFirst::class != valueOfSecond::class) {
                 throw IllegalArgumentException("Values must be of the same type!")
@@ -86,7 +86,7 @@ public object StdLib : ConstraintLibrary {
      * @param values provided set of values
      * @return in set constraint
      * */
-    public fun inSet(variable: Variable, values: Set<Value>): Goal {
+    public fun inSet(variable: Variable<*>, values: Set<Value>): Goal {
         return Constraint.or(values.map { Constraint.eq(variable, it) }.toList())
     }
 

@@ -20,19 +20,19 @@ import com.logikaldb.ConstraintRegistry
 import com.logikaldb.entity.AndEntity
 import com.logikaldb.entity.ConstraintEntity
 import com.logikaldb.entity.EqualEntity
+import com.logikaldb.entity.Goal
 import com.logikaldb.entity.GoalEntity
 import com.logikaldb.entity.OrEntity
-import com.logikaldb.logikal.Goal
+import com.logikaldb.logikal.GoalFun
 import com.logikaldb.logikal.Logikal
 import kotlinx.coroutines.FlowPreview
 
 internal class GoalConverter(private val constraintRegistry: ConstraintRegistry) {
-
     enum class GoalCombinatorType { NONE, AND, OR }
-    data class Frame(val currentGoalEntity: GoalCombinatorType, val goals: MutableList<Goal>, val goalEntities: MutableList<com.logikaldb.entity.Goal>)
+    data class Frame(val currentGoalEntity: GoalCombinatorType, val goals: MutableList<GoalFun>, val goalEntities: MutableList<Goal>)
 
     @FlowPreview
-    fun convertToGoal(goalEntity: GoalEntity): Goal {
+    fun convertToGoal(goalEntity: GoalEntity): GoalFun {
         val initialFrame = createInitialFrame(goalEntity.goal)
         val stack = ArrayDeque<Frame>()
         stack.addLast(initialFrame)
@@ -53,7 +53,7 @@ internal class GoalConverter(private val constraintRegistry: ConstraintRegistry)
         }
     }
 
-    private fun createInitialFrame(goalEntity: com.logikaldb.entity.Goal): Frame {
+    private fun createInitialFrame(goalEntity: Goal): Frame {
         return when (goalEntity) {
             is EqualEntity -> {
                 Frame(GoalCombinatorType.NONE, mutableListOf(createEqualGoal(goalEntity)), mutableListOf())
@@ -122,13 +122,13 @@ internal class GoalConverter(private val constraintRegistry: ConstraintRegistry)
         }
     }
 
-    private fun createEqualGoal(equalEntity: EqualEntity): Goal {
+    private fun createEqualGoal(equalEntity: EqualEntity): GoalFun {
         val firstValue = ValueConverter.convertToValue(equalEntity.firstValueEntity)
         val secondValue = ValueConverter.convertToValue(equalEntity.secondValueEntity)
         return Logikal.equal(firstValue, secondValue)
     }
 
-    private fun createConstraintGoal(constraintEntity: ConstraintEntity): Goal {
+    private fun createConstraintGoal(constraintEntity: ConstraintEntity): GoalFun {
         return if (constraintEntity.constraintGoal != null) {
             constraintEntity.constraintGoal
         } else {

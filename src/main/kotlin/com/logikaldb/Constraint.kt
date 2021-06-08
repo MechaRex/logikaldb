@@ -16,8 +16,6 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb
 
-import com.logikaldb.Constraint.and
-import com.logikaldb.Constraint.or
 import com.logikaldb.converter.ConstraintConverter
 import com.logikaldb.converter.ValueConverter
 import com.logikaldb.entity.AndEntity
@@ -35,15 +33,14 @@ import com.logikaldb.logikal.VariableName
  * Constraint object's responsibility is to handle every kind of constraint creation.
  * */
 public object Constraint {
-
     /**
      * Creates a logical variable.
      *
      * @param variableName name of the variable
      * @return logical variable
      * */
-    public fun vr(variableName: VariableName): Variable {
-        return Variable(variableName)
+    public fun <T> vr(variableName: VariableName, variableType: Class<T>): Variable<T> {
+        return Variable(variableName, variableType)
     }
 
     /**
@@ -77,7 +74,7 @@ public object Constraint {
         constraintFun: VariableConstraint
     ): Goal {
         val constraintName = ConstraintConverter.convertToConstraintName(constraintReference)
-        val constrainedVariables = parameterValues.filterIsInstance<Variable>()
+        val constrainedVariables = parameterValues.filterIsInstance<Variable<*>>()
         val parameterEntities = parameterValues.map(ValueConverter::convertToValueEntity)
         val constraintGoal = Logikal.constraint(constrainedVariables, constraintFun)
         return ConstraintEntity(constraintName, parameterEntities, constraintGoal)

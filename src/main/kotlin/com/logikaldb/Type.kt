@@ -17,11 +17,8 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 package com.logikaldb
 
 import com.logikaldb.entity.Goal
-import com.logikaldb.entity.GoalV2
 import kotlin.reflect.KFunction
 
 public typealias ConstraintName = String
 public typealias ConstraintFun = KFunction<Goal>
-public typealias ConstraintFunTyped = KFunction<GoalV2>
 public typealias ConstraintRegistry = Map<ConstraintName, ConstraintFun>
-public typealias ConstraintRegistryTyped = Map<ConstraintName, ConstraintFunTyped>

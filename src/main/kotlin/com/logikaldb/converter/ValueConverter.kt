@@ -23,17 +23,16 @@ import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Variable
 
 internal object ValueConverter {
-
     fun convertToValueEntity(value: Value): ValueTypeEntity {
         return when (value) {
-            is Variable -> VariableEntity(value.variableName)
+            is Variable<*> -> VariableEntity(value.variableName, value.variableType)
             else -> ValueEntity(value)
         }
     }
 
     fun convertToValue(valueTypeEntity: ValueTypeEntity): Value {
         return when (valueTypeEntity) {
-            is VariableEntity -> Variable(valueTypeEntity.variableName)
+            is VariableEntity -> Variable(valueTypeEntity.variableName, valueTypeEntity.variableType)
             is ValueEntity -> valueTypeEntity.value
         }
     }

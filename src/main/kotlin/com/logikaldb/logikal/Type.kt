@@ -20,10 +20,7 @@ import kotlinx.coroutines.flow.Flow
 
 public typealias Value = Any
 public typealias VariableName = String
-public data class Variable(val variableName: VariableName)
-public data class VariableTyped<T>(val variableName: VariableName, val variableType: Class<T>)
+public data class Variable<T>(val variableName: VariableName, val variableType: Class<T>)
 public typealias VariableConstraint = (State) -> State?
-public typealias VariableConstraintTyped = (StateTyped) -> StateTyped?
-public typealias Result = Map<Variable, Value>
-internal typealias Goal = (State) -> Flow<State?>
-internal typealias GoalTyped = (StateTyped) -> Flow<StateTyped?>
+public typealias Result = Map<Variable<*>, Value>
+internal typealias GoalFun = (State) -> Flow<State?>
