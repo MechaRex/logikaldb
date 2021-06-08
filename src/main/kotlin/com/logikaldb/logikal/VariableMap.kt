@@ -27,6 +27,19 @@ public data class VariableMap(private val variableValueMap: Map<Variable<*>, Any
         }
     }
 
+    public tailrec fun dynamicValueOf(value: Value): Value {
+        return if (value is Variable<*>) {
+            val variableValue = variableValueMap[value]
+            if (variableValue != null) {
+                dynamicValueOf(variableValue)
+            } else {
+                value
+            }
+        } else {
+            value
+        }
+    }
+
     public fun <T> hasValue(variable: Variable<T>): Boolean {
         val value = valueOf(variable)
         return value !is Variable<*> && value != null

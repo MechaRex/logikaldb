@@ -49,11 +49,7 @@ public data class State(
      * @return value of the provided value
      * */
     public fun dynamicValueOf(value: Value): Value {
-        return if (value is Variable<*>) {
-            valueMap.valueOf(value) ?: value
-        } else {
-            value
-        }
+        return valueMap.dynamicValueOf(value)
     }
 
     /**
