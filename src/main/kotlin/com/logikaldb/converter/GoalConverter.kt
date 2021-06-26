@@ -16,7 +16,6 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.converter
 
-import com.logikaldb.ConstraintRegistry
 import com.logikaldb.entity.AndEntity
 import com.logikaldb.entity.ConstraintEntity
 import com.logikaldb.entity.EqualEntity
@@ -27,7 +26,7 @@ import com.logikaldb.logikal.GoalFun
 import com.logikaldb.logikal.Logikal
 import kotlinx.coroutines.FlowPreview
 
-internal class GoalConverter(private val constraintRegistry: ConstraintRegistry) {
+internal class GoalConverter() {
     enum class GoalCombinatorType { NONE, AND, OR }
     data class Frame(val currentGoalEntity: GoalCombinatorType, val goals: MutableList<GoalFun>, val goalEntities: MutableList<Goal>)
 
@@ -129,16 +128,6 @@ internal class GoalConverter(private val constraintRegistry: ConstraintRegistry)
     }
 
     private fun createConstraintGoal(constraintEntity: ConstraintEntity): GoalFun {
-        return if (constraintEntity.constraintGoal != null) {
-            constraintEntity.constraintGoal
-        } else {
-            val constraintFun = constraintRegistry[constraintEntity.constraintName]
-                ?: error("Following constraint doesn't exist: ${constraintEntity.constraintName} !")
-            val goalParameterValues = constraintEntity.parameters
-                .map(ValueConverter::convertToValue)
-                .toTypedArray()
-            val evaluatedConstraintEntity = constraintFun.call(*goalParameterValues) as ConstraintEntity
-            evaluatedConstraintEntity.constraintGoal!!
-        }
+        return constraintEntity.constraintGoal
     }
 }

@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 internal object Logikal {
-    fun constraint(constrainedVariables: List<Variable<*>>, variableConstraint: VariableConstraint): GoalFun = { state ->
+    fun constraint(constrainedVariables: List<Variable<*>>, variableConstraint: VariableConstraint): GoalFun = GoalFun { state ->
         val isEveryConstrainedVariableInitialized = constrainedVariables.all { state.hasValue(it) }
         val stateWithConstraints = constrainedVariables.fold(state, createConstraintRegister(variableConstraint))
         if (isEveryConstrainedVariableInitialized && stateWithConstraints != null) {
@@ -38,13 +38,13 @@ internal object Logikal {
         state?.addConstraint(variable, variableConstraint)
     }
 
-    fun equal(firstValue: Value, secondValue: Value): GoalFun = { state ->
+    fun equal(firstValue: Value, secondValue: Value): GoalFun = GoalFun { state ->
         val newState = state.unify(firstValue, secondValue)
         flowOf(newState)
     }
 
     @FlowPreview
-    fun or(goals: List<GoalFun>): GoalFun = { state ->
+    fun or(goals: List<GoalFun>): GoalFun = GoalFun { state ->
         val combinedGoals = goals.asFlow().map { it(state) }
         combinedGoals.flattenMerge()
     }
@@ -53,14 +53,14 @@ internal object Logikal {
     fun or(vararg goals: GoalFun): GoalFun = or(goals.toList())
 
     @FlowPreview
-    fun and(firstGoal: GoalFun, secondGoal: GoalFun): GoalFun = { state ->
+    fun and(firstGoal: GoalFun, secondGoal: GoalFun): GoalFun = GoalFun { state ->
         val firstGoalStateFlow = firstGoal(state)
         val combinedGoal = firstGoalStateFlow.filterNotNull().map { secondGoal(it) }
         combinedGoal.flattenMerge()
     }
 
     @FlowPreview
-    fun and(goals: List<GoalFun>): GoalFun = { state ->
+    fun and(goals: List<GoalFun>): GoalFun = GoalFun { state ->
         val combinedAndGoal = goals.reduce(::and)
         combinedAndGoal(state)
     }

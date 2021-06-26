@@ -16,10 +16,8 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.entity
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.logikaldb.ConstraintName
 import com.logikaldb.logikal.GoalFun
 import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.VariableName
@@ -48,8 +46,4 @@ internal data class AndEntity(val goals: List<Goal>) : Goal()
 internal data class OrEntity(val goals: List<Goal>) : Goal()
 
 @JsonTypeName("constraint")
-internal data class ConstraintEntity(
-    val constraintName: ConstraintName,
-    val parameters: List<ValueTypeEntity>,
-    @JsonIgnore val constraintGoal: GoalFun?
-) : Goal()
+internal data class ConstraintEntity(val constraintGoal: GoalFun) : Goal()

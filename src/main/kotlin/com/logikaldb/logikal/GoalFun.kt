@@ -14,13 +14,16 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
-package com.logikaldb.converter
+package com.logikaldb.logikal
 
-import com.logikaldb.ConstraintFun
-import com.logikaldb.ConstraintName
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.logikaldb.serializer.GoalFunDeserializer
+import com.logikaldb.serializer.GoalFunSerializer
+import kotlinx.coroutines.flow.Flow
 
-internal object ConstraintConverter {
-    fun convertToConstraintName(constraintFun: ConstraintFun): ConstraintName {
-        return "$constraintFun"
-    }
+@JsonSerialize(using = GoalFunSerializer::class)
+@JsonDeserialize(using = GoalFunDeserializer::class)
+internal fun interface GoalFun : java.io.Serializable {
+    operator fun invoke(state: State): Flow<State?>
 }

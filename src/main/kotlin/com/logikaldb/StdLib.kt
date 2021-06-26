@@ -23,10 +23,10 @@ import com.logikaldb.logikal.Variable
 /**
  * Standard library of LogikalDB.
  * */
-public object StdLib : ConstraintLibrary {
+public object StdLib {
 
     /**
-     * Creates a not equal constraint.
+     * Creates a dynamic not equal constraint.
      * [notEq] is a constraint constructor.
      * Not equal means that [firstValue] != [secondValue] and [secondValue] != [firstValue].
      *
@@ -34,8 +34,8 @@ public object StdLib : ConstraintLibrary {
      * @param secondValue second value in the constraint
      * @return not equal constraint
      * */
-    public fun notEq(firstValue: Value, secondValue: Value): Goal {
-        return Constraint.create(::notEq, firstValue, secondValue) { state ->
+    public fun notEqDynamic(firstValue: Value, secondValue: Value): Goal {
+        return Constraint.create(firstValue, secondValue) { state ->
             val valueOfFirst = state.dynamicValueOf(firstValue)
             val valueOfSecond = state.dynamicValueOf(secondValue)
             if (valueOfFirst == valueOfSecond) {
@@ -47,7 +47,49 @@ public object StdLib : ConstraintLibrary {
     }
 
     /**
-     * Creates a comparability constraint.
+     * Creates a typed not equal variable constraint.
+     * [notEq] is a constraint constructor.
+     * Not equal means that [variable] != [expectedValue] and [expectedValue] != [variable].
+     *
+     * @param variable variable to be checked
+     * @param expectedValue expected value of the variable
+     * @return not equal constraint
+     * */
+    public fun <T> notEq(variable: Variable<T>, expectedValue: T): Goal {
+        return Constraint.create(listOf(variable, expectedValue)) { state ->
+            val value = state.valueOf(variable)
+            if (value == expectedValue) {
+                null
+            } else {
+                state
+            }
+        }
+    }
+
+    /**
+     * Creates a typed not equal variable constraint.
+     * [notEq] is a constraint constructor.
+     * Not equal means that [firstVariable] != [secondVariable] and [secondVariable] != [firstVariable].
+     *
+     * @param firstVariable first variable to be checked
+     * @param secondVariable second variable to be checked
+     * @return not equal constraint
+     * */
+    public fun <T> notEq(firstVariable: Variable<T>, secondVariable: Variable<T>): Goal {
+        return Constraint.create(listOf(firstVariable, secondVariable)) { state ->
+            val firstValue = state.valueOf(firstVariable)
+            val secondValue = state.valueOf(secondVariable)
+
+            if (firstValue == secondValue) {
+                null
+            } else {
+                state
+            }
+        }
+    }
+
+    /**
+     * Creates a dynamic comparability constraint.
      * [cmp] is a constraint constructor.
      * Comparability means that [firstValue] compareTo [secondValue] == [compareValue].
      *
@@ -56,8 +98,8 @@ public object StdLib : ConstraintLibrary {
      * @param compareValue provided [compareTo] result value to match
      * @return comparability constraint
      * */
-    public fun cmp(firstValue: Value, secondValue: Value, compareValue: Int): Goal {
-        return Constraint.create(::cmp, firstValue, secondValue, compareValue) { state ->
+    public fun cmpDynamic(firstValue: Value, secondValue: Value, compareValue: Int): Goal {
+        return Constraint.create(firstValue, secondValue, compareValue) { state ->
             val valueOfFirst = state.dynamicValueOf(firstValue)
             val valueOfSecond = state.dynamicValueOf(secondValue)
 
@@ -78,6 +120,53 @@ public object StdLib : ConstraintLibrary {
     }
 
     /**
+     * Creates a typed comparability constraint.
+     * [cmp] is a constraint constructor.
+     * Comparability means that [variable] compareTo [value] == [expectedCompareValue].
+     *
+     * @param variable variable to be compared to
+     * @param value value to be compared to
+     * @param expectedCompareValue provided [compareTo] result value to match
+     * @return comparability constraint
+     * */
+    public fun <T : Comparable<T>> cmp(variable: Variable<T>, value: T, expectedCompareValue: Int): Goal {
+        return Constraint.create(listOf(variable, value, expectedCompareValue)) { state ->
+            val valueOfVariable = state.valueOf(variable)
+
+            val compareResult = (valueOfVariable)?.compareTo(value)
+            if (compareResult == expectedCompareValue) {
+                state
+            } else {
+                null
+            }
+        }
+    }
+
+    /**
+     * Creates a typed comparability constraint.
+     * [cmp] is a constraint constructor.
+     * Comparability means that [firstVariable] compareTo [secondVariable] == [expectedCompareValue].
+     *
+     * @param firstVariable first variable to be compared to
+     * @param secondVariable second variable to be compared to
+     * @param expectedCompareValue provided [compareTo] result value to match
+     * @return comparability constraint
+     * */
+    public fun <T : Comparable<T>> cmp(firstVariable: Variable<T>, secondVariable: Variable<T>, expectedCompareValue: Int): Goal {
+        return Constraint.create(listOf(firstVariable, secondVariable, expectedCompareValue)) { state ->
+            val firstValue = state.valueOf(firstVariable)
+            val secondValue = state.valueOf(secondVariable)
+
+            val compareResult = secondValue?.let { firstValue?.compareTo(it) }
+            if (compareResult == expectedCompareValue) {
+                state
+            } else {
+                null
+            }
+        }
+    }
+
+    /**
      * Creates an in set constraint.
      * [inSet] is a constraint constructor.
      * In set constrains means that the provided variable has separately the provided set of values.
@@ -86,14 +175,7 @@ public object StdLib : ConstraintLibrary {
      * @param values provided set of values
      * @return in set constraint
      * */
-    public fun inSet(variable: Variable<*>, values: Set<Value>): Goal {
+    public fun <T> inSet(variable: Variable<T>, values: Set<T>): Goal {
         return Constraint.or(values.map { Constraint.eq(variable, it) }.toList())
-    }
-
-    /**
-     * Internal function that you don't need to use.
-     * */
-    override fun exportConstraints(): ConstraintRegistry {
-        return registerConstraints(::notEq, ::cmp)
     }
 }
