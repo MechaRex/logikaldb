@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 internal object Logikal {
-    fun constraint(constrainedVariables: List<Variable>, variableConstraint: VariableConstraint): Goal = { state ->
+    fun constraint(constrainedVariables: List<Variable<*>>, variableConstraint: VariableConstraint): GoalFun = GoalFun { state ->
         val isEveryConstrainedVariableInitialized = constrainedVariables.all { state.hasValue(it) }
         val stateWithConstraints = constrainedVariables.fold(state, createConstraintRegister(variableConstraint))
         if (isEveryConstrainedVariableInitialized && stateWithConstraints != null) {
@@ -34,37 +34,37 @@ internal object Logikal {
         }
     }
 
-    private fun createConstraintRegister(variableConstraint: VariableConstraint) = { state: State?, variable: Variable ->
+    private fun createConstraintRegister(variableConstraint: VariableConstraint) = { state: State?, variable: Variable<*> ->
         state?.addConstraint(variable, variableConstraint)
     }
 
-    fun equal(firstValue: Value, secondValue: Value): Goal = { state ->
+    fun equal(firstValue: Value, secondValue: Value): GoalFun = GoalFun { state ->
         val newState = state.unify(firstValue, secondValue)
         flowOf(newState)
     }
 
     @FlowPreview
-    fun or(goals: List<Goal>): Goal = { state ->
+    fun or(goals: List<GoalFun>): GoalFun = GoalFun { state ->
         val combinedGoals = goals.asFlow().map { it(state) }
         combinedGoals.flattenMerge()
     }
 
     @FlowPreview
-    fun or(vararg goals: Goal): Goal = or(goals.toList())
+    fun or(vararg goals: GoalFun): GoalFun = or(goals.toList())
 
     @FlowPreview
-    fun and(firstGoal: Goal, secondGoal: Goal): Goal = { state ->
+    fun and(firstGoal: GoalFun, secondGoal: GoalFun): GoalFun = GoalFun { state ->
         val firstGoalStateFlow = firstGoal(state)
         val combinedGoal = firstGoalStateFlow.filterNotNull().map { secondGoal(it) }
         combinedGoal.flattenMerge()
     }
 
     @FlowPreview
-    fun and(goals: List<Goal>): Goal = { state ->
+    fun and(goals: List<GoalFun>): GoalFun = GoalFun { state ->
         val combinedAndGoal = goals.reduce(::and)
         combinedAndGoal(state)
     }
 
     @FlowPreview
-    fun and(vararg goals: Goal): Goal = and(goals.toList())
+    fun and(vararg goals: GoalFun): GoalFun = and(goals.toList())
 }

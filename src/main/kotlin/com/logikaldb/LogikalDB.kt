@@ -29,30 +29,14 @@ import kotlinx.coroutines.flow.map
 /**
  * LogikalDB that handles the database and the built in query/logical engine.
  *
- * @param constraintLibraries custom constraint libraries
  * @param fdbVersion version of FDB to use
  * @param clusterFilePath path to the FDB cluster file
  * @constructor creates a [LogikalDB] instance
  * */
-public class LogikalDB(constraintLibraries: List<ConstraintLibrary>, fdbVersion: Int = 620, clusterFilePath: String? = null) {
+public class LogikalDB(fdbVersion: Int = 620, clusterFilePath: String? = null) {
     private val entitySerializer: EntitySerializer = EntitySerializer()
     private val databaseHandler: DatabaseHandler = DatabaseHandler(fdbVersion, clusterFilePath)
-    private val goalConverter: GoalConverter
-
-    init {
-        val mergedLibraries = StdLib.registerConstraintLibraries(constraintLibraries + StdLib)
-        goalConverter = GoalConverter(mergedLibraries)
-    }
-
-    /**
-     * LogikalDB that handles the database and the built in query/logical engine.
-     *
-     * @param constraintLibraries custom constraint libraries
-     * @param fdbVersion version of FDB to use
-     * @param clusterFilePath path to the FDB cluster file
-     * */
-    public constructor(vararg constraintLibraries: ConstraintLibrary, fdbVersion: Int = 620, clusterFilePath: String? = null) :
-        this(constraintLibraries.toList(), fdbVersion, clusterFilePath)
+    private val goalConverter: GoalConverter = GoalConverter()
 
     /**
      * Reads a value from the database.

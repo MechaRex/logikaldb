@@ -40,7 +40,7 @@ class EntitySerializerTest : StringSpec({
     val underTest = EntitySerializer()
 
     fun createEqualEntity(randomPair: Pair<Sample<String>, Sample<Any>>): EqualEntity {
-        return EqualEntity(VariableEntity(randomPair.first.value), ValueEntity(randomPair.second.value))
+        return EqualEntity(VariableEntity(randomPair.first.value, String::class.java), ValueEntity(randomPair.second.value))
     }
 
     fun anyRandomValues(randomSource: RandomSource): Sequence<Sample<Any>> {
@@ -63,36 +63,19 @@ class EntitySerializerTest : StringSpec({
         }
     }
 
-    "A serialized and deserialized ConstraintEntity must be the same when the constraintGoal is null" {
+    "A serialized and deserialized ConstraintEntity is not the same when the constraint goal is defined" {
         val constraintGoalEntityArb = arb { randomSource ->
             val randomConstraints = Arb.string().values(randomSource)
             val randomParameters = Arb.list(Arb.string())
-                .map { parameterNames -> parameterNames.map { VariableEntity(it) } }
+                .map { parameterNames -> parameterNames.map { VariableEntity(it, String::class.java) } }
                 .values(randomSource)
             randomConstraints.zip(randomParameters)
-                .map { ConstraintEntity(it.first.value, it.second.value, null) }
-                .map { GoalEntity(it) }
-        }
-        forAll(constraintGoalEntityArb) { constraintGoalEntity ->
-            underTest.deserialize(underTest.serialize(constraintGoalEntity)) == constraintGoalEntity
-        }
-    }
-
-    "A serialized and deserialized ConstraintEntity must not be the same when the constraint goal is not null" {
-        val constraintGoalEntityArb = arb { randomSource ->
-            val randomConstraints = Arb.string().values(randomSource)
-            val randomParameters = Arb.list(Arb.string())
-                .map { parameterNames -> parameterNames.map { VariableEntity(it) } }
-                .values(randomSource)
-            randomConstraints.zip(randomParameters)
-                .map { ConstraintEntity(it.first.value, it.second.value, equal(1, 1)) }
+                .map { ConstraintEntity(equal(1, 1)) }
                 .map { GoalEntity(it) }
         }
         forAll(constraintGoalEntityArb) { constraintGoalEntity ->
             val convertedConstraintGoalEntity = underTest.deserialize(underTest.serialize(constraintGoalEntity))
-            convertedConstraintGoalEntity != constraintGoalEntity &&
-                (constraintGoalEntity.goal as ConstraintEntity).constraintGoal != null &&
-                (convertedConstraintGoalEntity.goal as ConstraintEntity).constraintGoal == null
+            convertedConstraintGoalEntity != constraintGoalEntity
         }
     }
 

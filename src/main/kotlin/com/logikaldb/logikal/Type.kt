@@ -16,11 +16,8 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.logikal
 
-import kotlinx.coroutines.flow.Flow
-
 public typealias Value = Any
 public typealias VariableName = String
-public data class Variable(val variableName: VariableName)
+public data class Variable<T>(val variableName: VariableName, val variableType: Class<T>) : java.io.Serializable
 public typealias VariableConstraint = (State) -> State?
-public typealias Result = Map<Variable, Value>
-internal typealias Goal = (State) -> Flow<State?>
+public typealias Result = Map<Variable<*>, Value>

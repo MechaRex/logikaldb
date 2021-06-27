@@ -18,8 +18,8 @@ Foundational reactive logical database
 ```kotlin
 val logikalDB = LogikalDB()
 
-val pokemonName = vr("name")
-val pokemonType = vr("type")
+val pokemonName = vr("name", String::class.java)
+val pokemonType = vr("type", String::class.java)
 
 val dataset = or(
    and(eq(pokemonName, "Bulbasaur"), eq(pokemonType, "Grass")),
@@ -38,8 +38,8 @@ logikalDB.read(listOf("example", "quick"), "pokemon")
    .select(pokemonName)
    .forEach { println("Result: $it") }
 
-// Result: {Variable(variableName=name)=Vulpix}
-// Result: {Variable(variableName=name)=Charmander}
+// Result: VariableMap(variableValueMap={Variable(variableName=name, variableType=class java.lang.String)=Vulpix})
+// Result: VariableMap(variableValueMap={Variable(variableName=name, variableType=class java.lang.String)=Charmander})
 ```
 This quick example shows the basic principles behind LogikalDB, which is to use basic logical operators to describe and query our dataset.\
 You can also see that LogikalDB is a folder path based key-value database. For example in this case the folder path is `/example/quick` and the key is `pokemon`.\
@@ -53,16 +53,17 @@ LogikalDB basically built up by three big components:
 
 ## Basics of logic programming in LogikalDB
 To understand LogikalDB you first need to understand it's built-in logical programming system(Logikal), because it's components are used for both data modelling and querying:
-1. `vr(variableName: String): Variable` variable constructor:
-   - `val variable = vr("variable")`: creates a logical variable called `variable`
-2. `eq(firstValue: Value, secondValue: Value): Goal` constraint:
-   - Logikal is dynamically typed, which means that Value is basically synonym for the Any type
+1. `vr(variableName: VariableName, variableType: Class<T>): Variable<T>` variable constructor:
+   - Logikal is optionally typed which means that T can be a concrete value or it can also be a dynamic type like `Value` which is a type alisa for Any?
+   - `val variable = vr("variable", String::class.java)`: creates a logical string variable called `variable`
+2. `eq(variable: Variable<T>, value: T): Goal` constraint:
+   - Logikal is optionally typed, so it supports both statically and dynamically created equality constraints 
    - Goal is basically a synonym for constraint in the system
    - `eq(variable, 42)`: the `variable`'s value will be always `42`, so you can think of it as immutable assignment
-   - `eq(42, variable)`: the order of the values doesn't matter at all, and it has the same result as the above example
-   - `eq(firstVariable, secondVariable)`: `firstVariable` will be tied to the `secondVariable`, which means that it doesn't matter which one is initialized.
-      For example `eq(firstVariable,12)` will mean that the `secondVariable`'s value will be also `12`.
-   - `eq(variable, BigDecimal(1024))`: logikal is dynamically typed which means that eq accepts any kind of values as input
+   - `eq(firstVariable, secondVarliable)`: `firstVariable` will be tied to the `secondVariable`, which means that it doesn't matter which one is initialized.
+      For example `eq(firstVariable, 12)` will mean that the `secondVariable`'s value will be also `12`.
+   - `eq(secondVarliable, firstVariable)`: the order of the values doesn't matter at all, and it has the same result as the above example
+   - `eq(variable, BigDecimal(1024))`: logikal can work with any kind of type in a type safe manner
 3. and(firstConstraint: Goal, ... , lastConstraint: Goal) constraint combinator:
    - `and(eq(firstVariable, 42), eq(secondVariable, 128))`: `firstVariable`'s value will be `42` and the `secondVariable`'s value will be `128` at the same time
    - `and(eq(firstVariable, 42), eq(firstVariable, 128))`: in this case we want that the `firstVariable`'s value to be `42` and `128` at the same time, but this is **not allowed**, so `firstVariable` **won't be defined at all**
@@ -80,11 +81,11 @@ For example the `notEq` constraint in the standard library is defined as custom 
 
 ## Data modeling
 The data modelling is based on the previously mentioned logical components, but in this case you can think of constraints(or Goals) as data builders for simplicity’s sake:
-1. `vr("field"): Variable` constructor: In a data modeling context vr will be the same as field which hold some value
-2. `eq(vr("fieldName"), fieldValue): Goal` data builder : `eq` is responsible for pairing the field with its associated value
+1. `vr(variableName, variableType): Variable` constructor: In a data modeling context vr will be the same as field which hold some type of value
+2. `eq(variable, value): Goal` data builder : `eq` is responsible for pairing the field with it's associated value
 3. `and(firstDataBuilder: Goal, ... , lastDataBuilder: Goal): Goal` data builder combinator: and is responsible for tying together the data builders together in one data entity(record)
 4. `or(firstDataBuilder: Goal, ... , lastDataBuilder: goal): Goal` data builder combinator: or makes it possible for one data builder to have more than one value(list)
-5. Custom constraints: Like it was mentioned before you can also use custom constraints like `notEq` in your data model. For example putting `notEq(vr("fieldName"), fieldValue)` into our data means that field will never will be the same as the provided value, but if we try to make it equal then the data(or state) becomes invalid.
+5. Custom constraints: Like it was mentioned before you can also use custom constraints like `notEq` in your data model. For example putting `notEq(variable, value)` into our data means that field will never will be the same as the provided value, but if we try to make it equal then the data(or state) becomes invalid.
 
 For example let's say we have the following csv we want to model:
 ```
@@ -94,13 +95,17 @@ Year,Make,Model
 ```
 We can model it in the following way:
 ```kotlin
+val year = vr("Year", Integer::class.java)
+val make = vr("Make", String::class.java)
+val model = vr("Model", String::class.java)
+
 or(
-   and(eq(vr("Year"), 1997), eq(vr("Make"), "Ford"), eq(vr("Model"), "E350")),
-   and(eq(vr("Year"), 2000), eq(vr("Make"), "Mercury"), eq(vr("Model"), "Cougar"))
+   and(eq(year, 1997), eq(make, "Ford"), eq(model, "E350")),
+   and(eq(year, 2000), eq(make, "Mercury"), eq(model, "Cougar"))
 )
 ```
 In this example we can see that:
-   - eq(vr("fieldName"), fieldValue) is responsible for creating the fields of the json object
+   - eq(variable, value) is responsible for creating the fields of the json object
    - and( fields ) is responsible for tying together the fields of a row together
    - or( rows ) is responsible for creating the rows by making it possible by making a field(or column) have multiple values
 
@@ -132,9 +137,14 @@ Another interesting thing about LogikalDB queries is that they are based on lazy
 
 The following example show these features:
 ```kotlin
-val firstQueryConstraint = and(eq(vr("firstField"), "firstValue"), eq(vr("secondField"), "secondValue"))
-val secondQueryConstraintFirstPart = or(eq(vr("thirdField"), "thirdValueA"), eq(vr("thirdField"), "thirdValueB"))
-val secondQueryConstraintSecondPart = notEq(vr("fourthField"), "fourthValue")
+val firstField = vr("firstField", String::class.java)
+val secondField = vr("secondField", String::class.java)
+val thirdField = vr("thirdField", String::class.java)
+val fourthField = vr("fourthField", String::class.java)
+
+val firstQueryConstraint = and(eq(firstField, "firstValue"), eq(secondField, "secondValue"))
+val secondQueryConstraintFirstPart = or(eq(thirdField, "thirdValueA"), eq(thirdField, "thirdValueB"))
+val secondQueryConstraintSecondPart = notEq(fourthField, "fourthValue")
 val secondQueryConstraint = and(secondQueryConstraintFirstPart, secondQueryConstraintSecondPart)
 
 logikalDB.read(listOf("logikaldb"), "key") // getting the data from the db
@@ -172,9 +182,9 @@ The standard library only uses the publicly available extension points of Logika
 The only speciality is that the standard library is automatically included in LogikalDB.
 
 For now the standard library provides the following functionality:
-1. `notEq(firstValue: Value, secondValue: Value): Goal`
-2. `cmp(firstValue: Value, secondValue: Value, compareValue: Int): Goal`
-3. `inSet(variable: Variable, values: Set<Value>): Goal`
+1. `notEq` and `notEqDynamic`
+2. `cmp` and `cmpDynamic`
+3. `inSet`
 
 Standard library is under work so let us know what kind of functionality you would like to see in it.
 
@@ -184,12 +194,12 @@ It's important to note, because programming languages are just tools to describe
 So a program in any kind of programming language can be thought as just a state stream, where we start with some initial state, which we modify until we reach a final state where we can get the answer we want.
 So the type information of a program can be imagined as: `input: State -> processing:(State -> State) -> output: State`
 
-In LogikalDB we use the same concept for querying, because querying is basically just about finding the one or more state where are answers are hiding.
+In LogikalDB we use the same concept for querying, because querying is basically just about finding one or more state where the answers are hiding.
 You can thin of querying the following way: `data: State -> querying:(State -> Flow<State?>) -> result: Flow<State?>`
 First we get some initial state, which for example can be the data returned from the database and
 in the query phase is where the uncertainty comes in place, because in case of a query it can happen that the query fails, or it returns multiple results, which is why we are using `Flow<State?>` type.
 
-In this concept the constraints job is to modify the state of our program, which is the query itself.
+In this concept the constraint's job is to modify the state of our program, which is the query itself.
 We have multiple built-in simple operations of constraints to modify the state:
 1. eq() used for adding a new value to the state
 2. and() used for grouping values together in one state
@@ -203,23 +213,14 @@ So they kind of sit outside the normal flow of a query and only gets involved wh
 ## Create custom constraints
 Custom constraints are the main extension point of LogikalDB as it let you plug in your custom code into the hearth of the system.
 This is why the custom constraint system is a very powerful and advanced feature, so use it wisely.
-This introduction is at the end of the readme, because you need to be familiar how the constraint system works to be able to understand how you can extend it.  
+This introduction is at the end of the readme, because you need to be familiar how the constraint system works to be able to understand how you can extend it.
 
-The first step in creating your own constraints is defining a new `ConstraintLibrary` which will contain your constraints:
+First you need to create your custom constraint:
 ```kotlin
-public object MyLibrary : ConstraintLibrary {
-   override fun exportConstraints(): ConstraintRegistry {
-      return registerConstraints()
-   }
-}
-```
-
-The next step is to create the constraint itself inside the library:
-```kotlin
-public fun isHelloWorld(myInput: Value): Goal {
-        return Constraint.create(::isHelloWorld, myInput) { state ->
-            val valueOfMyInput = state.valueOf(myInput)
-            if (valueOfMyInput == "Hello world!") {
+public fun isHelloWorld(myVariable: Variable<String>): Goal {
+        return Constraint.create(myVariable) { state ->
+            val valueOfMyVariable = state.valueOf(myVariable)
+            if (valueOfMyVariable == "Hello world!") {
                 state
             } else {
                 null
@@ -228,23 +229,13 @@ public fun isHelloWorld(myInput: Value): Goal {
     }
 ```
 
-After that the next step is to register it in our library's `exportConstraints` function:
+After that you can just easily use that constraint however you like:
 ```kotlin
-override fun exportConstraints(): ConstraintRegistry {
-   return registerConstraints(::isHelloWorld)
-}
-```
+val myVariable = vr("A", String::class.java)
 
-Finally the last step is to register the library itself into LogikalDB:
-```kotlin
-val logikalDB = LogikalDB(MyLibrary)
-```
-
-After all that setup we can just use our constraint like we would use any other constraint in LogikalDB:
-```kotlin
 val result = and(
-   or(eq(vr("A"), "Foo bar!"), eq(vr("A"), "Hello world!")),
-   isHelloWorld(vr("A"))
+   or(eq(myVariable, "Foo bar!"), eq(myVariable, "Hello world!")),
+   isHelloWorld(myVariable)
 )
 ```
 

@@ -16,9 +16,6 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb
 
-import com.logikaldb.Constraint.and
-import com.logikaldb.Constraint.or
-import com.logikaldb.converter.ConstraintConverter
 import com.logikaldb.converter.ValueConverter
 import com.logikaldb.entity.AndEntity
 import com.logikaldb.entity.ConstraintEntity
@@ -35,19 +32,18 @@ import com.logikaldb.logikal.VariableName
  * Constraint object's responsibility is to handle every kind of constraint creation.
  * */
 public object Constraint {
-
     /**
      * Creates a logical variable.
      *
      * @param variableName name of the variable
      * @return logical variable
      * */
-    public fun vr(variableName: VariableName): Variable {
-        return Variable(variableName)
+    public fun <T> vr(variableName: VariableName, variableType: Class<T>): Variable<T> {
+        return Variable(variableName, variableType)
     }
 
     /**
-     * Creates an equality constraint between the firstValue and the secondValue.
+     * Creates a dynamic equality constraint between the firstValue and the secondValue.
      * [eq] is a constraint constructor.
      * Equality means that [firstValue] == [secondValue] and [secondValue] == [firstValue].
      *
@@ -55,9 +51,39 @@ public object Constraint {
      * @param secondValue second value in the constraint
      * @return equality constraint
      * */
-    public fun eq(firstValue: Value, secondValue: Value): Goal {
-        val firstValueEntity = ValueConverter.convertToValueEntity(firstValue)
-        val secondValueEntity = ValueConverter.convertToValueEntity(secondValue)
+    public fun eqDynamic(firstValue: Value, secondValue: Value): Goal {
+        val firstValueEntity = ValueConverter.convertToValueTypeEntity(firstValue)
+        val secondValueEntity = ValueConverter.convertToValueTypeEntity(secondValue)
+        return EqualEntity(firstValueEntity, secondValueEntity)
+    }
+
+    /**
+     * Creates a typed equality constraint between the firstValue and the secondValue.
+     * [eq] is a constraint constructor.
+     * Equality means that [variable] == [value] and [value] == [variable].
+     *
+     * @param variable variable in the constraint
+     * @param value value in the constraint
+     * @return equality constraint
+     * */
+    public fun <T> eq(variable: Variable<T>, value: T): Goal {
+        val firstValueEntity = ValueConverter.convertToValueTypeEntity(variable)
+        val secondValueEntity = ValueConverter.convertToValueTypeEntity(value as Value)
+        return EqualEntity(firstValueEntity, secondValueEntity)
+    }
+
+    /**
+     * Creates a typed equality constraint between the firstValue and the secondValue.
+     * [eq] is a constraint constructor.
+     * Equality means that [firstVariable] == [secondVariable] and [secondVariable] == [firstVariable].
+     *
+     * @param firstVariable first variable in the constraint
+     * @param secondVariable second variable in the constraint
+     * @return equality constraint
+     * */
+    public fun <T> eq(firstVariable: Variable<T>, secondVariable: Variable<T>): Goal {
+        val firstValueEntity = ValueConverter.convertToValueTypeEntity(firstVariable)
+        val secondValueEntity = ValueConverter.convertToValueTypeEntity(secondVariable)
         return EqualEntity(firstValueEntity, secondValueEntity)
     }
 
@@ -66,21 +92,17 @@ public object Constraint {
      * [create] is a constraint constructor.
      * Custom logic needs to follow the [VariableConstraint] functional interface, which is basically a state filter: (State) -> State?.
      *
-     * @param constraintReference function reference of the created custom constraint
      * @param parameterValues values used in the custom constraint
      * @param constraintFun implementation of the custom constraint
      * @return custom constraint
      * */
     public fun create(
-        constraintReference: ConstraintFun,
         parameterValues: List<Value>,
         constraintFun: VariableConstraint
     ): Goal {
-        val constraintName = ConstraintConverter.convertToConstraintName(constraintReference)
-        val constrainedVariables = parameterValues.filterIsInstance<Variable>()
-        val parameterEntities = parameterValues.map(ValueConverter::convertToValueEntity)
+        val constrainedVariables = parameterValues.filterIsInstance<Variable<*>>()
         val constraintGoal = Logikal.constraint(constrainedVariables, constraintFun)
-        return ConstraintEntity(constraintName, parameterEntities, constraintGoal)
+        return ConstraintEntity(constraintGoal)
     }
 
     /**
@@ -88,17 +110,15 @@ public object Constraint {
      * [create] is a constraint constructor.
      * Custom logic needs to follow the [VariableConstraint] functional interface, which is basically a state filter: (State) -> State?.
      *
-     * @param constraintReference function reference of the created custom constraint
      * @param parameterValues values used in the custom constraint
      * @param constraintFun implementation of the custom constraint
      * @return custom constraint
      * */
     public fun create(
-        constraintReference: ConstraintFun,
         vararg parameterValues: Value,
         constraintFun: VariableConstraint
     ): Goal {
-        return create(constraintReference, parameterValues.toList(), constraintFun)
+        return create(parameterValues.toList(), constraintFun)
     }
 
     /**

@@ -25,8 +25,8 @@ package com.logikaldb.logikal
  * @constructor state instance
  * */
 public data class State(
-    private val valueMap: Result = emptyMap(),
-    private val constraintMap: Map<Variable, List<VariableConstraint>> = emptyMap()
+    private val valueMap: VariableMap = VariableMap(),
+    private val constraintMap: Map<Variable<*>, List<VariableConstraint>> = emptyMap()
 ) {
 
     /**
@@ -35,8 +35,8 @@ public data class State(
      * @param variable variable to check
      * @return does the variable have a value
      * */
-    public fun hasValue(variable: Variable): Boolean {
-        return valueOf(variable) !is Variable
+    public fun <T> hasValue(variable: Variable<T>): Boolean {
+        return valueMap.hasValue(variable)
     }
 
     /**
@@ -48,13 +48,18 @@ public data class State(
      * @param value provided value
      * @return value of the provided value
      * */
-    public tailrec fun valueOf(value: Value): Value {
-        val variableValue = valueMap[value]
-        return if (variableValue != null) {
-            valueOf(variableValue)
-        } else {
-            value
-        }
+    public fun dynamicValueOf(value: Value): Value {
+        return valueMap.dynamicValueOf(value)
+    }
+
+    /**
+     * Gives back the value of the variable in the state.
+     *
+     * @param variable provided variable
+     * @return value of the provided value or null if the variable doesn't have a value
+     * */
+    public fun <T> valueOf(variable: Variable<T>): T? {
+        return valueMap.valueOf(variable)
     }
 
     /**
@@ -64,11 +69,13 @@ public data class State(
      * @param variables provided variables that we are interested in
      * @return result of the state
      * */
-    public fun valuesOf(variables: List<Variable>): Result {
+    public fun valuesOf(variables: List<Variable<*>>): VariableMap {
         return if (variables.isEmpty()) {
-            valueMap.keys.map { it to valueOf(it) }.toMap()
+            val variableValueMap = valueMap.keys().associateWith { dynamicValueOf(it) }
+            VariableMap(variableValueMap)
         } else {
-            variables.map { it to valueOf(it) }.toMap()
+            val variableValueMap = variables.associateWith { dynamicValueOf(it) }
+            VariableMap(variableValueMap)
         }
     }
 
@@ -79,19 +86,19 @@ public data class State(
      * @param variables provided variables that we are interested in
      * @return result of the state
      * */
-    public fun valuesOf(vararg variables: Variable): Result {
+    public fun valuesOf(vararg variables: Variable<*>): VariableMap {
         return valuesOf(variables.toList())
     }
 
-    internal fun hasConstraint(variable: Variable): Boolean {
+    internal fun hasConstraint(variable: Variable<*>): Boolean {
         return constraintMap.containsKey(variable)
     }
 
-    internal fun constraintsOf(variable: Variable): List<VariableConstraint> {
+    internal fun constraintsOf(variable: Variable<*>): List<VariableConstraint> {
         return constraintMap[variable] ?: error("Variable doesn't have constraints!")
     }
 
-    internal fun addConstraint(variable: Variable, variableConstraint: VariableConstraint): State {
+    internal fun addConstraint(variable: Variable<*>, variableConstraint: VariableConstraint): State {
         return if (constraintMap.containsKey(variable)) {
             val variableConstraints = constraintMap.getValue(variable)
             copy(constraintMap = constraintMap - variable + Pair(variable, variableConstraints + variableConstraint))
@@ -101,18 +108,18 @@ public data class State(
     }
 
     internal fun unify(firstValue: Value, secondValue: Value): State? {
-        val evaluatedFirstValue = valueOf(firstValue)
-        val evaluatedSecondValue = valueOf(secondValue)
+        val evaluatedFirstValue = dynamicValueOf(firstValue)
+        val evaluatedSecondValue = dynamicValueOf(secondValue)
         return when {
             evaluatedFirstValue == evaluatedSecondValue -> this
-            evaluatedFirstValue is Variable -> addAndCheckVariable(evaluatedFirstValue, evaluatedSecondValue)
-            evaluatedSecondValue is Variable -> addAndCheckVariable(evaluatedSecondValue, evaluatedFirstValue)
+            evaluatedFirstValue is Variable<*> -> addAndCheckVariable(evaluatedFirstValue, evaluatedSecondValue)
+            evaluatedSecondValue is Variable<*> -> addAndCheckVariable(evaluatedSecondValue, evaluatedFirstValue)
             else -> null
         }
     }
 
-    private fun addAndCheckVariable(variable: Variable, value: Value): State? {
-        val newState = copy(valueMap = valueMap + Pair(variable, value))
+    private fun addAndCheckVariable(variable: Variable<*>, value: Value): State? {
+        val newState = copy(valueMap = valueMap.plus(Pair(variable, value)))
         val variableConstraints = constraintMap.getOrDefault(variable, emptyList())
         return variableConstraints.filter { variableConstraint ->
             val constrainedVariables = getConstrainedVariables(variableConstraint)
@@ -120,7 +127,7 @@ public data class State(
         }.fold(newState, ::executeConstraint)
     }
 
-    private fun getConstrainedVariables(variableConstraint: VariableConstraint): List<Variable> {
+    private fun getConstrainedVariables(variableConstraint: VariableConstraint): List<Variable<*>> {
         return constraintMap.filterValues { it.contains(variableConstraint) }.map { it.key }
     }
 
