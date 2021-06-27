@@ -18,6 +18,12 @@ package com.logikaldb.logikal
 
 public data class VariableMap(private val variableValueMap: Map<Variable<*>, Any> = mapOf()) {
 
+    /**
+     * Gives back the value of the variable in the state.
+     *
+     * @param variable provided variable
+     * @return value of the provided value or null if the variable doesn't have a value
+     * */
     public tailrec fun <T> valueOf(variable: Variable<T>): T? {
         val value = variableValueMap[variable]
         return if (value != null && value is Variable<*>) {
@@ -27,6 +33,15 @@ public data class VariableMap(private val variableValueMap: Map<Variable<*>, Any
         }
     }
 
+    /**
+     * Gives back the value of the provided value.
+     * Value can be either [Value] or [Variable].
+     * If the value is [Variable] then it gives back the value of the variable in the state.
+     * If the value is [Value] then it gives back the provided value itself.
+     *
+     * @param value provided value
+     * @return value of the provided value
+     * */
     public tailrec fun dynamicValueOf(value: Value): Value {
         return if (value is Variable<*>) {
             val variableValue = variableValueMap[value]
@@ -40,6 +55,12 @@ public data class VariableMap(private val variableValueMap: Map<Variable<*>, Any
         }
     }
 
+    /**
+     * Shows if a variable has a value in the state.
+     *
+     * @param variable variable to check
+     * @return does the variable have a value
+     * */
     public fun <T> hasValue(variable: Variable<T>): Boolean {
         val value = valueOf(variable)
         return value !is Variable<*> && value != null
