@@ -19,16 +19,16 @@ package com.logikaldb.serializer
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
-import com.logikaldb.logikal.GoalFun
+import com.logikaldb.logikal.ConstraintFun
 import java.io.ByteArrayInputStream
 import java.io.ObjectInputStream
 
-internal class GoalFunDeserializer : JsonDeserializer<GoalFun>() {
-    override fun deserialize(jsonParser: JsonParser?, ctxt: DeserializationContext?): GoalFun {
+internal class ConstraintFunDeserializer : JsonDeserializer<ConstraintFun>() {
+    override fun deserialize(jsonParser: JsonParser?, ctxt: DeserializationContext?): ConstraintFun {
         val binaryValue = jsonParser!!.binaryValue
         ByteArrayInputStream(binaryValue).use { byteArrayInputStream ->
             ObjectInputStream(byteArrayInputStream).use { objectInputStream ->
-                return objectInputStream.readObject() as GoalFun
+                return objectInputStream.readObject() as ConstraintFun
             }
         }
     }

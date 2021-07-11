@@ -16,7 +16,7 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb
 
-import com.logikaldb.entity.Goal
+import com.logikaldb.entity.Constraint
 import com.logikaldb.logikal.Field
 import com.logikaldb.logikal.Value
 
@@ -34,8 +34,8 @@ public object StdLib {
      * @param expectedValue expected value of the field
      * @return not equal constraint
      * */
-    public fun <T> notEq(field: Field<T>, expectedValue: T): Goal {
-        return Constraint.create(listOf(field, expectedValue as Value)) { state ->
+    public fun <T> notEq(field: Field<T>, expectedValue: T): Constraint {
+        return ConstraintFactory.create(listOf(field, expectedValue as Value)) { state ->
             val value = state.valueOf(field)
             if (value == expectedValue) {
                 null
@@ -54,8 +54,8 @@ public object StdLib {
      * @param secondField second field to be checked
      * @return not equal constraint
      * */
-    public fun <T> notEq(firstField: Field<T>, secondField: Field<T>): Goal {
-        return Constraint.create(listOf(firstField, secondField)) { state ->
+    public fun <T> notEq(firstField: Field<T>, secondField: Field<T>): Constraint {
+        return ConstraintFactory.create(listOf(firstField, secondField)) { state ->
             val firstValue = state.valueOf(firstField)
             val secondValue = state.valueOf(secondField)
 
@@ -77,8 +77,8 @@ public object StdLib {
      * @param expectedCompareValue provided [compareTo] result value to match
      * @return comparability constraint
      * */
-    public fun <T : Comparable<T>> cmp(field: Field<T>, value: T, expectedCompareValue: Int): Goal {
-        return Constraint.create(listOf(field, value, expectedCompareValue)) { state ->
+    public fun <T : Comparable<T>> cmp(field: Field<T>, value: T, expectedCompareValue: Int): Constraint {
+        return ConstraintFactory.create(listOf(field, value, expectedCompareValue)) { state ->
             val valueOfField = state.valueOf(field)
 
             val compareResult = (valueOfField)?.compareTo(value)
@@ -100,8 +100,8 @@ public object StdLib {
      * @param expectedCompareValue provided [compareTo] result value to match
      * @return comparability constraint
      * */
-    public fun <T : Comparable<T>> cmp(firstField: Field<T>, secondField: Field<T>, expectedCompareValue: Int): Goal {
-        return Constraint.create(listOf(firstField, secondField, expectedCompareValue)) { state ->
+    public fun <T : Comparable<T>> cmp(firstField: Field<T>, secondField: Field<T>, expectedCompareValue: Int): Constraint {
+        return ConstraintFactory.create(listOf(firstField, secondField, expectedCompareValue)) { state ->
             val firstValue = state.valueOf(firstField)
             val secondValue = state.valueOf(secondField)
 
@@ -123,7 +123,7 @@ public object StdLib {
      * @param values provided set of values
      * @return in set constraint
      * */
-    public fun <T> inSet(field: Field<T>, values: Set<T>): Goal {
-        return Constraint.or(values.map { Constraint.eq(field, it) }.toList())
+    public fun <T> inSet(field: Field<T>, values: Set<T>): Constraint {
+        return ConstraintFactory.or(values.map { ConstraintFactory.eq(field, it) }.toList())
     }
 }

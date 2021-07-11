@@ -19,15 +19,15 @@ package com.logikaldb.serializer
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.databind.JsonSerializer
 import com.fasterxml.jackson.databind.SerializerProvider
-import com.logikaldb.logikal.GoalFun
+import com.logikaldb.logikal.ConstraintFun
 import java.io.ByteArrayOutputStream
 import java.io.ObjectOutputStream
 
-internal class GoalFunSerializer : JsonSerializer<GoalFun>() {
-    override fun serialize(goalFun: GoalFun?, jsonGenerator: JsonGenerator?, serializerProvider: SerializerProvider?) {
+internal class ConstraintFunSerializer : JsonSerializer<ConstraintFun>() {
+    override fun serialize(constraintFun: ConstraintFun?, jsonGenerator: JsonGenerator?, serializerProvider: SerializerProvider?) {
         ByteArrayOutputStream().use { byteArrayOutputStream ->
             ObjectOutputStream(byteArrayOutputStream).use { objectOutputStream ->
-                objectOutputStream.writeObject(goalFun)
+                objectOutputStream.writeObject(constraintFun)
                 jsonGenerator!!.writeBinary(byteArrayOutputStream.toByteArray())
             }
         }

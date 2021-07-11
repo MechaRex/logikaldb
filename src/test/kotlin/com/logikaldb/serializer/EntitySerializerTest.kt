@@ -18,9 +18,9 @@ package com.logikaldb.serializer
 
 import com.logikaldb.entity.AndEntity
 import com.logikaldb.entity.ConstraintEntity
+import com.logikaldb.entity.ConstraintFunEntity
 import com.logikaldb.entity.EqualEntity
 import com.logikaldb.entity.FieldEntity
-import com.logikaldb.entity.GoalEntity
 import com.logikaldb.entity.OrEntity
 import com.logikaldb.entity.ValueEntity
 import com.logikaldb.logikal.Logikal.equal
@@ -51,31 +51,31 @@ class EntitySerializerTest : StringSpec({
     }
 
     "A serialized and deserialized EqualEntity must be the same as the original entity" {
-        val equalGoalEntityArb = arb { randomSource ->
+        val equalConstraintEntityArb = arb { randomSource ->
             val randomFields = Arb.string().values(randomSource)
             val randomValues = anyRandomValues(randomSource)
             randomFields.zip(randomValues)
                 .map(::createEqualEntity)
-                .map { GoalEntity(it) }
+                .map { ConstraintEntity(it) }
         }
-        forAll(equalGoalEntityArb) { equalGoalEntity ->
-            underTest.deserialize(underTest.serialize(equalGoalEntity)) == equalGoalEntity
+        forAll(equalConstraintEntityArb) { equalConstraintEntity ->
+            underTest.deserialize(underTest.serialize(equalConstraintEntity)) == equalConstraintEntity
         }
     }
 
-    "A serialized and deserialized ConstraintEntity is not the same when the constraint goal is defined" {
-        val constraintGoalEntityArb = arb { randomSource ->
+    "A serialized and deserialized ConstraintEntity is not the same when the constraint fun is defined" {
+        val constraintConstraintEntityArb = arb { randomSource ->
             val randomConstraints = Arb.string().values(randomSource)
             val randomParameters = Arb.list(Arb.string())
                 .map { parameterNames -> parameterNames.map { FieldEntity(it, String::class.java) } }
                 .values(randomSource)
             randomConstraints.zip(randomParameters)
-                .map { ConstraintEntity(equal(1, 1)) }
-                .map { GoalEntity(it) }
+                .map { ConstraintFunEntity(equal(1, 1)) }
+                .map { ConstraintEntity(it) }
         }
-        forAll(constraintGoalEntityArb) { constraintGoalEntity ->
-            val convertedConstraintGoalEntity = underTest.deserialize(underTest.serialize(constraintGoalEntity))
-            convertedConstraintGoalEntity != constraintGoalEntity
+        forAll(constraintConstraintEntityArb) { constraintConstraintEntity ->
+            val convertedConstraintConstraintEntity = underTest.deserialize(underTest.serialize(constraintConstraintEntity))
+            convertedConstraintConstraintEntity != constraintConstraintEntity
         }
     }
 
@@ -86,13 +86,13 @@ class EntitySerializerTest : StringSpec({
             randomFields.zip(randomValues)
                 .map(::createEqualEntity)
         }
-        val andGoalEntityArb = arb { randomSource ->
+        val andConstraintEntityArb = arb { randomSource ->
             Arb.list(equalEntityArb, IntRange(0, 100)).values(randomSource)
                 .map { AndEntity(it.value) }
-                .map { GoalEntity(it) }
+                .map { ConstraintEntity(it) }
         }
-        forAll(andGoalEntityArb) { andGoalEntity ->
-            underTest.deserialize(underTest.serialize(andGoalEntity)) == andGoalEntity
+        forAll(andConstraintEntityArb) { andConstraintEntity ->
+            underTest.deserialize(underTest.serialize(andConstraintEntity)) == andConstraintEntity
         }
     }
 
@@ -103,13 +103,13 @@ class EntitySerializerTest : StringSpec({
             randomFields.zip(randomValues)
                 .map(::createEqualEntity)
         }
-        val orGoalEntityArb = arb { randomSource ->
+        val orConstraintEntityArb = arb { randomSource ->
             Arb.list(equalEntityArb, IntRange(0, 100)).values(randomSource)
                 .map { OrEntity(it.value) }
-                .map { GoalEntity(it) }
+                .map { ConstraintEntity(it) }
         }
-        forAll(orGoalEntityArb) { orGoalEntity ->
-            underTest.deserialize(underTest.serialize(orGoalEntity)) == orGoalEntity
+        forAll(orConstraintEntityArb) { orConstraintEntity ->
+            underTest.deserialize(underTest.serialize(orConstraintEntity)) == orConstraintEntity
         }
     }
 })

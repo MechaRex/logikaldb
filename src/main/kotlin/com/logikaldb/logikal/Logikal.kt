@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 internal object Logikal {
-    fun constraint(constrainedFields: List<Field<*>>, fieldConstraint: FieldConstraint): GoalFun = GoalFun { state ->
+    fun constraint(constrainedFields: List<Field<*>>, fieldConstraint: FieldConstraint): ConstraintFun = ConstraintFun { state ->
         val isEveryConstrainedFieldInitialized = constrainedFields.all { state.hasValue(it) }
         val stateWithConstraints = constrainedFields.fold(state, createConstraintRegister(fieldConstraint))
         if (isEveryConstrainedFieldInitialized && stateWithConstraints != null) {
@@ -38,33 +38,33 @@ internal object Logikal {
         state?.addConstraint(field, fieldConstraint)
     }
 
-    fun equal(firstValue: Value, secondValue: Value): GoalFun = GoalFun { state ->
+    fun equal(firstValue: Value, secondValue: Value): ConstraintFun = ConstraintFun { state ->
         val newState = state.unify(firstValue, secondValue)
         flowOf(newState)
     }
 
     @FlowPreview
-    fun or(goals: List<GoalFun>): GoalFun = GoalFun { state ->
-        val combinedGoals = goals.asFlow().map { it(state) }
-        combinedGoals.flattenMerge()
+    fun or(constraints: List<ConstraintFun>): ConstraintFun = ConstraintFun { state ->
+        val combinedConstraintFuns = constraints.asFlow().map { it(state) }
+        combinedConstraintFuns.flattenMerge()
     }
 
     @FlowPreview
-    fun or(vararg goals: GoalFun): GoalFun = or(goals.toList())
+    fun or(vararg constraints: ConstraintFun): ConstraintFun = or(constraints.toList())
 
     @FlowPreview
-    fun and(firstGoal: GoalFun, secondGoal: GoalFun): GoalFun = GoalFun { state ->
-        val firstGoalStateFlow = firstGoal(state)
-        val combinedGoal = firstGoalStateFlow.filterNotNull().map { secondGoal(it) }
-        combinedGoal.flattenMerge()
+    fun and(firstConstraint: ConstraintFun, secondConstraint: ConstraintFun): ConstraintFun = ConstraintFun { state ->
+        val firstConstraintFunStateFlow = firstConstraint(state)
+        val combinedConstraintFunStateFlow = firstConstraintFunStateFlow.filterNotNull().map { secondConstraint(it) }
+        combinedConstraintFunStateFlow.flattenMerge()
     }
 
     @FlowPreview
-    fun and(goals: List<GoalFun>): GoalFun = GoalFun { state ->
-        val combinedAndGoal = goals.reduce(::and)
-        combinedAndGoal(state)
+    fun and(constraints: List<ConstraintFun>): ConstraintFun = ConstraintFun { state ->
+        val combinedAndConstraintFun = constraints.reduce(::and)
+        combinedAndConstraintFun(state)
     }
 
     @FlowPreview
-    fun and(vararg goals: GoalFun): GoalFun = and(goals.toList())
+    fun and(vararg constraints: ConstraintFun): ConstraintFun = and(constraints.toList())
 }

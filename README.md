@@ -57,17 +57,17 @@ To understand LogikalDB you first need to understand it's built-in logical progr
 1. `field(name: Name, type: Class<T>): Field<T>` field constructor:
    - Logikal is typed which means that T can be a concrete value or it can also be a dynamic type like `Value` which is a type alisa for `Any?`
    - `val myField = field("myField", String::class.java)`: creates a logical string field called `myField`
-2. `eq(field: Field<T>, value: T): Goal` constraint:
-   - Goal is basically a synonym for constraint in the system
+2. `eq(field: Field<T>, value: T): Constraint` constraint:
+   - Constraint is basically a synonym for constraint in the system
    - `eq(field, 42)`: the `field`'s value will be always `42`, so you can think of it as immutable assignment
    - `eq(firstField, secondField)`: `firstField` will be tied to the `secondField`, which means that it doesn't matter which one is initialized first.
       For example `eq(firstField, 12)` will mean that the `secondField`'s value will be also `12`.
    - `eq(secondField, firstField)`: the order of the parameter values doesn't matter at all, and it has the same result as the above example
    - `eq(field, BigDecimal(1024))`: logikal can work with any kind of type in a type safe manner
-3. and(firstConstraint: Goal, ... , lastConstraint: Goal) constraint combinator:
+3. and(firstConstraint: Constraint, ... , lastConstraint: Constraint) constraint combinator:
    - `and(eq(firstField, 42), eq(secondField, 128))`: `firstField`'s value will be `42` and the `secondField`'s value will be `128` at the same time
    - `and(eq(firstField, 42), eq(firstField, 128))`: in this case we want that the `firstField`'s value to be `42` and `128` at the same time, but this is **not allowed**, so `firstField` **won't be defined at all**
-4. or(firstConstraint: Goal, ... , lastConstraint: Goal) constraint combinator:
+4. or(firstConstraint: Constraint, ... , lastConstraint: Constraint) constraint combinator:
    - `or(eq(firstField, 42), eq(firstField, 128))`: `firstField`'s value will be `42` at the **first time**, and it will be `128` at the **second time**.
    - `or(eq(firstField, 42), eq(secondField, 128))`: in this case we have different fields, but they are still separated time wise, which means that:
    - **First time** the `firstField`'s value will be `42`, but the `secondField` won't be defined
@@ -80,11 +80,11 @@ Another powerful feature of Logikal is that we can extend its system with our ow
 For example the `notEq` constraint in the standard library is defined as custom constraint, but you can still use it in both data modelling and querying. You can learn more about custom constraints in the later part of the readme.
 
 ## Data modeling
-The data modelling is based on the previously mentioned logical components, but in this case you can think of constraints(or Goals) as data builders for simplicity’s sake:
+The data modelling is based on the previously mentioned logical components, but in this case you can think of constraints as data builders for simplicity’s sake:
 1. `field(name, type): Field` constructor
-2. `eq(field, value): Goal` data builder : `eq` is responsible for pairing the field with it's associated value
-3. `and(firstDataBuilder: Goal, ... , lastDataBuilder: Goal): Goal` data builder combinator: and is responsible for tying together the data builders together in one data entity(record)
-4. `or(firstDataBuilder: Goal, ... , lastDataBuilder: goal): Goal` data builder combinator: or makes it possible for one data builder to have more than one value(list)
+2. `eq(field, value): Constraint` data builder : `eq` is responsible for pairing the field with it's associated value
+3. `and(firstDataBuilder: Constraint, ... , lastDataBuilder: Constraint): Constraint` data builder combinator: and is responsible for tying together the data builders together in one data entity(record)
+4. `or(firstDataBuilder: Constraint, ... , lastDataBuilder: Constraint): Constraint` data builder combinator: or makes it possible for one data builder to have more than one value(list)
 5. Custom constraints: Like it was mentioned before you can also use custom constraints like `notEq` in your data model. For example putting `notEq(myField, myValue)` means that `myField` will never will be the same as `myValue`, but if we try to make it equal then the data(or state) becomes invalid.
 
 For example let's say we have the following csv we want to model:
@@ -120,7 +120,7 @@ When you are working with LogikalDB you should think that you are working in a f
 - the directory path is the path to the directory where you are storing your files(or values)
 
 LogikalDB supports the following operations for now:
-1. `write(directoryPath: List<String>, key: String, value: Goal): Unit`: 
+1. `write(directoryPath: List<String>, key: String, value: Constraint): Unit`: 
    - Creates a value in the specified directory under the specified key
    - For example: `write(listof("logikaldb","examples"), "intro", eq(field("example", String::class.java), "Hello World!"))` creates a `example="Hello World!"` value under the `intro` key in the `logikaldb/examples` directory
 2. `read(directoryPath: List<String>, key: String): Query`:
@@ -167,10 +167,10 @@ val employees = logikalDB.read(listOf("example", "join"), "employee")
 val departments = logikalDB.read(listOf("example", "join"), "department")
 
 // This is the constraint used to join the tables based on the department name
-val joinGoal = eq(empDepartment, depDepartmentName)
+val joinConstraint = eq(empDepartment, depDepartmentName)
 
 // Run the join query and print out the results
-employees.join(joinGoal, departments)
+employees.join(joinConstraint, departments)
    .select()
    .forEach { println("Result by joining two tables: $it") }
 ```
@@ -216,7 +216,7 @@ This introduction is at the end of the readme, because you need to be familiar h
 
 First you need to create your custom constraint:
 ```kotlin
-public fun isHelloWorld(myField: Field<String>): Goal {
+public fun isHelloWorld(myField: Field<String>): Constraint {
         return Constraint.create(myField) { state ->
             val valueOfMyField = state.valueOf(myField)
             if (valueOfMyField == "Hello world!") {
