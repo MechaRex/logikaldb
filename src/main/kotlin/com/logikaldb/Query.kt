@@ -17,8 +17,8 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 package com.logikaldb
 
 import com.logikaldb.entity.Goal
-import com.logikaldb.logikal.Variable
-import com.logikaldb.logikal.VariableMap
+import com.logikaldb.logikal.Field
+import com.logikaldb.logikal.FieldValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flattenMerge
@@ -121,50 +121,50 @@ public class Query(private val logikalDB: LogikalDB, private var goalFlow: Flow<
     }
 
     /**
-     * Selects variables from the database results.
+     * Selects fields from the database results.
      * This is a terminal operation and can be taught as the build method of this query builder.
      *
-     * @param selectedVariables provided variables that you are interested in
-     * @return list of variable values that we are interested in
+     * @param selectedFields provided fields that you are interested in
+     * @return list of field values that we are interested in
      * */
-    public suspend fun select(selectedVariables: List<Variable<*>>): List<VariableMap> {
+    public suspend fun select(selectedFields: List<Field<*>>): List<FieldValues> {
         return this.goalFlow.map { logikalDB.run(it) }
             .flattenMerge().filterNotNull()
-            .map { it.valuesOf(selectedVariables) }.toList()
+            .map { it.valuesOf(selectedFields) }.toList()
     }
 
     /**
-     * Selects variables from the database results.
+     * Selects fields from the database results.
      * This is a terminal operation and can be taught as the build method of this query builder.
      *
-     * @param selectedVariables provided variables that you are interested in
-     * @return list of variable values that we are interested in
+     * @param selectedFields provided fields that you are interested in
+     * @return list of field values that we are interested in
      * */
-    public suspend fun select(vararg selectedVariables: Variable<*>): List<VariableMap> {
-        return this.select(selectedVariables.toList())
+    public suspend fun select(vararg selectedFields: Field<*>): List<FieldValues> {
+        return this.select(selectedFields.toList())
     }
 
     /**
-     * Selects variables from the database results.
+     * Selects fields from the database results.
      * Non-terminal version of [select] and can be taught as the build method of this query builder.
      *
-     * @param selectedVariables provided variables that you are interested in
-     * @return flow of variable values that we are interested in
+     * @param selectedFields provided fields that you are interested in
+     * @return flow of field values that we are interested in
      * */
-    public fun selectFlow(selectedVariables: List<Variable<*>>): Flow<VariableMap> {
+    public fun selectFlow(selectedFields: List<Field<*>>): Flow<FieldValues> {
         return this.goalFlow.map { logikalDB.run(it) }
             .flattenMerge().filterNotNull()
-            .map { it.valuesOf(selectedVariables) }
+            .map { it.valuesOf(selectedFields) }
     }
 
     /**
-     * Selects variables from the database results.
+     * Selects fields from the database results.
      * Non-terminal version of [select] and can be taught as the build method of this query builder.
      *
-     * @param selectedVariables provided variables that you are interested in
-     * @return flow of variable values that we are interested in
+     * @param selectedFields provided fields that you are interested in
+     * @return flow of field values that we are interested in
      * */
-    public fun selectFlow(vararg selectedVariables: Variable<*>): Flow<VariableMap> {
-        return selectFlow(selectedVariables.toList())
+    public fun selectFlow(vararg selectedFields: Field<*>): Flow<FieldValues> {
+        return selectFlow(selectedFields.toList())
     }
 }

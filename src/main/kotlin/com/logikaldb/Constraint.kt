@@ -24,35 +24,36 @@ import com.logikaldb.entity.Goal
 import com.logikaldb.entity.OrEntity
 import com.logikaldb.logikal.Logikal
 import com.logikaldb.logikal.Value
-import com.logikaldb.logikal.Variable
-import com.logikaldb.logikal.VariableConstraint
-import com.logikaldb.logikal.VariableName
+import com.logikaldb.logikal.Field
+import com.logikaldb.logikal.FieldConstraint
+import com.logikaldb.logikal.Name
 
 /**
  * Constraint object's responsibility is to handle every kind of constraint creation.
  * */
 public object Constraint {
+
     /**
-     * Creates a logical variable.
+     * Creates a logical field.
      *
-     * @param variableName name of the variable
-     * @return logical variable
+     * @param name name of the field
+     * @return logical field
      * */
-    public fun <T> vr(variableName: VariableName, variableType: Class<T>): Variable<T> {
-        return Variable(variableName, variableType)
+    public fun <T> field(name: Name, type: Class<T>): Field<T> {
+        return Field(name, type)
     }
 
     /**
      * Creates a equality constraint between the firstValue and the secondValue.
      * [eq] is a constraint constructor.
-     * Equality means that [variable] == [value] and [value] == [variable].
+     * Equality means that [field] == [value] and [value] == [field].
      *
-     * @param variable variable in the constraint
+     * @param field field in the constraint
      * @param value value in the constraint
      * @return equality constraint
      * */
-    public fun <T> eq(variable: Variable<T>, value: T): Goal {
-        val firstValueEntity = ValueConverter.convertToValueTypeEntity(variable)
+    public fun <T> eq(field: Field<T>, value: T): Goal {
+        val firstValueEntity = ValueConverter.convertToValueTypeEntity(field)
         val secondValueEntity = ValueConverter.convertToValueTypeEntity(value as Value)
         return EqualEntity(firstValueEntity, secondValueEntity)
     }
@@ -60,22 +61,22 @@ public object Constraint {
     /**
      * Creates a equality constraint between the firstValue and the secondValue.
      * [eq] is a constraint constructor.
-     * Equality means that [firstVariable] == [secondVariable] and [secondVariable] == [firstVariable].
+     * Equality means that [firstField] == [secondField] and [secondField] == [firstField].
      *
-     * @param firstVariable first variable in the constraint
-     * @param secondVariable second variable in the constraint
+     * @param firstField first field in the constraint
+     * @param secondField second field in the constraint
      * @return equality constraint
      * */
-    public fun <T> eq(firstVariable: Variable<T>, secondVariable: Variable<T>): Goal {
-        val firstValueEntity = ValueConverter.convertToValueTypeEntity(firstVariable)
-        val secondValueEntity = ValueConverter.convertToValueTypeEntity(secondVariable)
+    public fun <T> eq(firstField: Field<T>, secondField: Field<T>): Goal {
+        val firstValueEntity = ValueConverter.convertToValueTypeEntity(firstField)
+        val secondValueEntity = ValueConverter.convertToValueTypeEntity(secondField)
         return EqualEntity(firstValueEntity, secondValueEntity)
     }
 
     /**
      * Creates a custom constraint with it's own custom logic.
      * [create] is a constraint constructor.
-     * Custom logic needs to follow the [VariableConstraint] functional interface, which is basically a state filter: (State) -> State?.
+     * Custom logic needs to follow the [FieldConstraint] functional interface, which is basically a state filter: (State) -> State?.
      *
      * @param parameterValues values used in the custom constraint
      * @param constraintFun implementation of the custom constraint
@@ -83,10 +84,10 @@ public object Constraint {
      * */
     public fun create(
         parameterValues: List<Value>,
-        constraintFun: VariableConstraint
+        constraintFun: FieldConstraint
     ): Goal {
-        val constrainedVariables = parameterValues.filterIsInstance<Variable<*>>()
-        val constraintGoal = Logikal.constraint(constrainedVariables, constraintFun)
+        val constrainedFields = parameterValues.filterIsInstance<Field<*>>()
+        val constraintGoal = Logikal.constraint(constrainedFields, constraintFun)
         return ConstraintEntity(constraintGoal)
     }
 

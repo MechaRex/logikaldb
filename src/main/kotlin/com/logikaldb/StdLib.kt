@@ -17,8 +17,8 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 package com.logikaldb
 
 import com.logikaldb.entity.Goal
+import com.logikaldb.logikal.Field
 import com.logikaldb.logikal.Value
-import com.logikaldb.logikal.Variable
 
 /**
  * Standard library of LogikalDB.
@@ -26,17 +26,17 @@ import com.logikaldb.logikal.Variable
 public object StdLib {
 
     /**
-     * Creates a not equal variable constraint.
+     * Creates a not equal field constraint.
      * [notEq] is a constraint constructor.
-     * Not equal means that [variable] != [expectedValue] and [expectedValue] != [variable].
+     * Not equal means that [field] != [expectedValue] and [expectedValue] != [field].
      *
-     * @param variable variable to be checked
-     * @param expectedValue expected value of the variable
+     * @param field field to be checked
+     * @param expectedValue expected value of the field
      * @return not equal constraint
      * */
-    public fun <T> notEq(variable: Variable<T>, expectedValue: T): Goal {
-        return Constraint.create(listOf(variable, expectedValue as Value)) { state ->
-            val value = state.valueOf(variable)
+    public fun <T> notEq(field: Field<T>, expectedValue: T): Goal {
+        return Constraint.create(listOf(field, expectedValue as Value)) { state ->
+            val value = state.valueOf(field)
             if (value == expectedValue) {
                 null
             } else {
@@ -46,18 +46,18 @@ public object StdLib {
     }
 
     /**
-     * Creates a not equal variable constraint.
+     * Creates a not equal field constraint.
      * [notEq] is a constraint constructor.
-     * Not equal means that [firstVariable] != [secondVariable] and [secondVariable] != [firstVariable].
+     * Not equal means that [firstField] != [secondField] and [secondField] != [firstField].
      *
-     * @param firstVariable first variable to be checked
-     * @param secondVariable second variable to be checked
+     * @param firstField first field to be checked
+     * @param secondField second field to be checked
      * @return not equal constraint
      * */
-    public fun <T> notEq(firstVariable: Variable<T>, secondVariable: Variable<T>): Goal {
-        return Constraint.create(listOf(firstVariable, secondVariable)) { state ->
-            val firstValue = state.valueOf(firstVariable)
-            val secondValue = state.valueOf(secondVariable)
+    public fun <T> notEq(firstField: Field<T>, secondField: Field<T>): Goal {
+        return Constraint.create(listOf(firstField, secondField)) { state ->
+            val firstValue = state.valueOf(firstField)
+            val secondValue = state.valueOf(secondField)
 
             if (firstValue == secondValue) {
                 null
@@ -70,18 +70,18 @@ public object StdLib {
     /**
      * Creates a comparability constraint.
      * [cmp] is a constraint constructor.
-     * Comparability means that [variable] compareTo [value] == [expectedCompareValue].
+     * Comparability means that [field] compareTo [value] == [expectedCompareValue].
      *
-     * @param variable variable to be compared to
+     * @param field field to be compared to
      * @param value value to be compared to
      * @param expectedCompareValue provided [compareTo] result value to match
      * @return comparability constraint
      * */
-    public fun <T : Comparable<T>> cmp(variable: Variable<T>, value: T, expectedCompareValue: Int): Goal {
-        return Constraint.create(listOf(variable, value, expectedCompareValue)) { state ->
-            val valueOfVariable = state.valueOf(variable)
+    public fun <T : Comparable<T>> cmp(field: Field<T>, value: T, expectedCompareValue: Int): Goal {
+        return Constraint.create(listOf(field, value, expectedCompareValue)) { state ->
+            val valueOfField = state.valueOf(field)
 
-            val compareResult = (valueOfVariable)?.compareTo(value)
+            val compareResult = (valueOfField)?.compareTo(value)
             if (compareResult == expectedCompareValue) {
                 state
             } else {
@@ -93,17 +93,17 @@ public object StdLib {
     /**
      * Creates a comparability constraint.
      * [cmp] is a constraint constructor.
-     * Comparability means that [firstVariable] compareTo [secondVariable] == [expectedCompareValue].
+     * Comparability means that [firstField] compareTo [secondField] == [expectedCompareValue].
      *
-     * @param firstVariable first variable to be compared to
-     * @param secondVariable second variable to be compared to
+     * @param firstField first field to be compared to
+     * @param secondField second field to be compared to
      * @param expectedCompareValue provided [compareTo] result value to match
      * @return comparability constraint
      * */
-    public fun <T : Comparable<T>> cmp(firstVariable: Variable<T>, secondVariable: Variable<T>, expectedCompareValue: Int): Goal {
-        return Constraint.create(listOf(firstVariable, secondVariable, expectedCompareValue)) { state ->
-            val firstValue = state.valueOf(firstVariable)
-            val secondValue = state.valueOf(secondVariable)
+    public fun <T : Comparable<T>> cmp(firstField: Field<T>, secondField: Field<T>, expectedCompareValue: Int): Goal {
+        return Constraint.create(listOf(firstField, secondField, expectedCompareValue)) { state ->
+            val firstValue = state.valueOf(firstField)
+            val secondValue = state.valueOf(secondField)
 
             val compareResult = secondValue?.let { firstValue?.compareTo(it) }
             if (compareResult == expectedCompareValue) {
@@ -117,13 +117,13 @@ public object StdLib {
     /**
      * Creates an in set constraint.
      * [inSet] is a constraint constructor.
-     * In set constrains means that the provided variable can have the provided set of values.
+     * In set constrains means that the provided field can have the provided set of values.
      *
-     * @param variable provided variable
+     * @param field provided field
      * @param values provided set of values
      * @return in set constraint
      * */
-    public fun <T> inSet(variable: Variable<T>, values: Set<T>): Goal {
-        return Constraint.or(values.map { Constraint.eq(variable, it) }.toList())
+    public fun <T> inSet(field: Field<T>, values: Set<T>): Goal {
+        return Constraint.or(values.map { Constraint.eq(field, it) }.toList())
     }
 }
