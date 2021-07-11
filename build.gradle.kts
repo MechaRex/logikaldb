@@ -8,9 +8,9 @@ val logikaldbArtifactId: String by project
 val logikaldbVersion: String by project
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    id("org.jmailen.kotlinter") version "3.2.0"
-    id("org.jetbrains.dokka") version "1.4.32"
+    kotlin("jvm") version "1.5.20"
+    id("org.jmailen.kotlinter") version "3.4.5"
+    id("org.jetbrains.dokka") version "1.5.0"
     id("maven-publish")
     id("signing")
     id("java-library")
