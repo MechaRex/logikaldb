@@ -18,11 +18,11 @@ package com.logikaldb.entity
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
-import com.logikaldb.logikal.GoalFun
+import com.logikaldb.logikal.ConstraintFun
 import com.logikaldb.logikal.Name
 import com.logikaldb.logikal.Value
 
-internal data class GoalEntity(val goal: Goal)
+internal data class ConstraintEntity(val constraint: Constraint)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
 internal sealed class ValueTypeEntity
@@ -34,16 +34,16 @@ internal data class ValueEntity(val value: Value) : ValueTypeEntity()
 internal data class FieldEntity(val name: Name, val type: Class<*>) : ValueTypeEntity()
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME)
-public sealed class Goal
+public sealed class Constraint
 
 @JsonTypeName("equal")
-internal data class EqualEntity(val firstValueEntity: ValueTypeEntity, val secondValueEntity: ValueTypeEntity) : Goal()
+internal data class EqualEntity(val firstValueEntity: ValueTypeEntity, val secondValueEntity: ValueTypeEntity) : Constraint()
 
 @JsonTypeName("and")
-internal data class AndEntity(val goals: List<Goal>) : Goal()
+internal data class AndEntity(val constraints: List<Constraint>) : Constraint()
 
 @JsonTypeName("or")
-internal data class OrEntity(val goals: List<Goal>) : Goal()
+internal data class OrEntity(val constraints: List<Constraint>) : Constraint()
 
-@JsonTypeName("constraint")
-internal data class ConstraintEntity(val constraintGoal: GoalFun) : Goal()
+@JsonTypeName("constraintFun")
+internal data class ConstraintFunEntity(val constraintFun: ConstraintFun) : Constraint()

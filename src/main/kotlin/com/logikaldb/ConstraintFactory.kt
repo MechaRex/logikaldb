@@ -18,9 +18,9 @@ package com.logikaldb
 
 import com.logikaldb.converter.ValueConverter
 import com.logikaldb.entity.AndEntity
-import com.logikaldb.entity.ConstraintEntity
+import com.logikaldb.entity.Constraint
+import com.logikaldb.entity.ConstraintFunEntity
 import com.logikaldb.entity.EqualEntity
-import com.logikaldb.entity.Goal
 import com.logikaldb.entity.OrEntity
 import com.logikaldb.logikal.Field
 import com.logikaldb.logikal.FieldConstraint
@@ -31,7 +31,7 @@ import com.logikaldb.logikal.Value
 /**
  * Constraint object's responsibility is to handle every kind of constraint creation.
  * */
-public object Constraint {
+public object ConstraintFactory {
 
     /**
      * Creates a logical field.
@@ -52,7 +52,7 @@ public object Constraint {
      * @param value value in the constraint
      * @return equality constraint
      * */
-    public fun <T> eq(field: Field<T>, value: T): Goal {
+    public fun <T> eq(field: Field<T>, value: T): Constraint {
         val firstValueEntity = ValueConverter.convertToValueTypeEntity(field)
         val secondValueEntity = ValueConverter.convertToValueTypeEntity(value as Value)
         return EqualEntity(firstValueEntity, secondValueEntity)
@@ -67,7 +67,7 @@ public object Constraint {
      * @param secondField second field in the constraint
      * @return equality constraint
      * */
-    public fun <T> eq(firstField: Field<T>, secondField: Field<T>): Goal {
+    public fun <T> eq(firstField: Field<T>, secondField: Field<T>): Constraint {
         val firstValueEntity = ValueConverter.convertToValueTypeEntity(firstField)
         val secondValueEntity = ValueConverter.convertToValueTypeEntity(secondField)
         return EqualEntity(firstValueEntity, secondValueEntity)
@@ -85,10 +85,10 @@ public object Constraint {
     public fun create(
         parameterValues: List<Value>,
         fieldConstraint: FieldConstraint
-    ): Goal {
+    ): Constraint {
         val constrainedFields = parameterValues.filterIsInstance<Field<*>>()
-        val constraintGoal = Logikal.constraint(constrainedFields, fieldConstraint)
-        return ConstraintEntity(constraintGoal)
+        val constraintFun = Logikal.constraint(constrainedFields, fieldConstraint)
+        return ConstraintFunEntity(constraintFun)
     }
 
     /**
@@ -96,11 +96,11 @@ public object Constraint {
      * [and] is a constraint combinator.
      * And means that every constraint in it will need to be true at the same time.
      *
-     * @param goals list of constraints that will be combined
+     * @param constraints list of constraints that will be combined
      * @return and constraint
      * */
-    public fun and(goals: List<Goal>): Goal {
-        return AndEntity(goals)
+    public fun and(constraints: List<Constraint>): Constraint {
+        return AndEntity(constraints)
     }
 
     /**
@@ -108,11 +108,11 @@ public object Constraint {
      * [and] is a constraint combinator.
      * And means that every constraint in it will need to be true at the same time.
      *
-     * @param goals list of constraints that will be combined
+     * @param constraints list of constraints that will be combined
      * @return and constraint
      * */
-    public fun and(vararg goals: Goal): Goal {
-        return AndEntity(goals.toList())
+    public fun and(vararg constraints: Constraint): Constraint {
+        return AndEntity(constraints.toList())
     }
 
     /**
@@ -120,11 +120,11 @@ public object Constraint {
      * [or] is a constraint combinator.
      * Or means that every constraint separately can be true.
      *
-     * @param goals list of constraints that will be combined
+     * @param constraints list of constraints that will be combined
      * @return or constraint
      * */
-    public fun or(goals: List<Goal>): Goal {
-        return OrEntity(goals)
+    public fun or(constraints: List<Constraint>): Constraint {
+        return OrEntity(constraints)
     }
 
     /**
@@ -132,10 +132,10 @@ public object Constraint {
      * [or] is a constraint combinator.
      * Or means that every constraint separately can be true.
      *
-     * @param goals list of constraints that will be combined
+     * @param constraints list of constraints that will be combined
      * @return or constraint
      * */
-    public fun or(vararg goals: Goal): Goal {
-        return OrEntity(goals.toList())
+    public fun or(vararg constraints: Constraint): Constraint {
+        return OrEntity(constraints.toList())
     }
 }

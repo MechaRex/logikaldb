@@ -16,10 +16,10 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb
 
-import com.logikaldb.converter.GoalConverter
+import com.logikaldb.converter.ConstraintFunConverter
 import com.logikaldb.database.DatabaseHandler
-import com.logikaldb.entity.Goal
-import com.logikaldb.entity.GoalEntity
+import com.logikaldb.entity.Constraint
+import com.logikaldb.entity.ConstraintEntity
 import com.logikaldb.logikal.State
 import com.logikaldb.serializer.EntitySerializer
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.map
 public class LogikalDB(fdbVersion: Int = 620, clusterFilePath: String? = null) {
     private val entitySerializer: EntitySerializer = EntitySerializer()
     private val databaseHandler: DatabaseHandler = DatabaseHandler(fdbVersion, clusterFilePath)
-    private val goalConverter: GoalConverter = GoalConverter()
+    private val constraintFunConverter: ConstraintFunConverter = ConstraintFunConverter()
 
     /**
      * Reads a value from the database.
@@ -47,9 +47,9 @@ public class LogikalDB(fdbVersion: Int = 620, clusterFilePath: String? = null) {
      * */
     public fun read(directoryPath: List<String>, key: String): Query {
         val serializedValueFlow = databaseHandler.read(directoryPath, key)
-        val goalEntityFlow = serializedValueFlow.filterNotNull().map(entitySerializer::deserialize)
-        val goalFlow = goalEntityFlow.map { it.goal }
-        return Query(this, goalFlow)
+        val constraintEntityFlow = serializedValueFlow.filterNotNull().map(entitySerializer::deserialize)
+        val constraintFlow = constraintEntityFlow.map { it.constraint }
+        return Query(this, constraintFlow)
     }
 
     /**
@@ -59,21 +59,21 @@ public class LogikalDB(fdbVersion: Int = 620, clusterFilePath: String? = null) {
      * @param key key of the value in the database
      * @param value value to insert into the database
      * */
-    public suspend fun write(directoryPath: List<String>, key: String, value: Goal) {
-        val goalEntity = GoalEntity(value)
-        val serializedValue = entitySerializer.serialize(goalEntity)
+    public suspend fun write(directoryPath: List<String>, key: String, value: Constraint) {
+        val constraintEntity = ConstraintEntity(value)
+        val serializedValue = entitySerializer.serialize(constraintEntity)
         databaseHandler.write(directoryPath, key, serializedValue)
     }
 
     /**
      * Evaluates the provided constraint.
      *
-     * @param goal provided constraint
+     * @param constraint provided constraint
      * @param state initial used for the evaluation
      * @return state flow result of the evaluation
      * */
-    public fun run(goal: Goal, state: State = State()): Flow<State?> {
-        val logikalGoal = goalConverter.convertToGoal(GoalEntity(goal))
-        return logikalGoal(state)
+    public fun run(constraint: Constraint, state: State = State()): Flow<State?> {
+        val constraintFun = constraintFunConverter.convertToConstraintFun(ConstraintEntity(constraint))
+        return constraintFun(state)
     }
 }

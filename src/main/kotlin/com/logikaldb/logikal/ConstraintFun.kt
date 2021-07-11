@@ -18,12 +18,12 @@ package com.logikaldb.logikal
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.logikaldb.serializer.GoalFunDeserializer
-import com.logikaldb.serializer.GoalFunSerializer
+import com.logikaldb.serializer.ConstraintFunDeserializer
+import com.logikaldb.serializer.ConstraintFunSerializer
 import kotlinx.coroutines.flow.Flow
 
-@JsonSerialize(using = GoalFunSerializer::class)
-@JsonDeserialize(using = GoalFunDeserializer::class)
-internal fun interface GoalFun : java.io.Serializable {
+@JsonSerialize(using = ConstraintFunSerializer::class)
+@JsonDeserialize(using = ConstraintFunDeserializer::class)
+internal fun interface ConstraintFun : java.io.Serializable {
     operator fun invoke(state: State): Flow<State?>
 }

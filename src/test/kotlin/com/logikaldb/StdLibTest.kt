@@ -16,9 +16,9 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb
 
-import com.logikaldb.Constraint.and
-import com.logikaldb.Constraint.eq
-import com.logikaldb.Constraint.field
+import com.logikaldb.ConstraintFactory.and
+import com.logikaldb.ConstraintFactory.eq
+import com.logikaldb.ConstraintFactory.field
 import com.logikaldb.StdLib.cmp
 import com.logikaldb.StdLib.inSet
 import com.logikaldb.StdLib.notEq
@@ -33,9 +33,9 @@ class StdLibTest : StringSpec({
     "notEq(field, value) should filter out constrained field when constraint matches and field is defined after notEq" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(eq(field, Integer(42)), notEq(field, Integer(42)))
+        val constraint = and(eq(field, Integer(42)), notEq(field, Integer(42)))
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -43,9 +43,9 @@ class StdLibTest : StringSpec({
     "notEq(field, value) should filter out constrained field when constraint matches and field is defined before notEq" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(notEq(field, Integer(42)), eq(field, Integer(42)))
+        val constraint = and(notEq(field, Integer(42)), eq(field, Integer(42)))
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -53,9 +53,9 @@ class StdLibTest : StringSpec({
     "notEq(field, value) should filter out constrained field when constraint doesn't match and field is defined after notEq" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(eq(field, Integer(42)), notEq(field, Integer(64)))
+        val constraint = and(eq(field, Integer(42)), notEq(field, Integer(64)))
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -63,9 +63,9 @@ class StdLibTest : StringSpec({
     "notEq(field, value) should filter out constrained field when constraint doesn't match and field is defined before notEq" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(notEq(field, Integer(42)), eq(field, Integer(64)))
+        val constraint = and(notEq(field, Integer(42)), eq(field, Integer(64)))
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -74,13 +74,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(firstField, Integer(42)),
             eq(secondField, Integer(42)),
             notEq(firstField, secondField)
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -89,13 +89,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             notEq(firstField, secondField),
             eq(firstField, Integer(42)),
             eq(secondField, Integer(42))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -104,13 +104,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(firstField, Integer(42)),
             eq(secondField, Integer(64)),
             notEq(firstField, secondField)
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -119,13 +119,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             notEq(firstField, secondField),
             eq(firstField, Integer(42)),
             eq(secondField, Integer(64))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -134,13 +134,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(firstField, Integer(42)),
             eq(secondField, Integer(64)),
             cmp(firstField, secondField, -1)
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -149,13 +149,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             cmp(firstField, secondField, -1),
             eq(firstField, Integer(42)),
             eq(secondField, Integer(64))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -164,13 +164,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(firstField, Integer(42)),
             eq(secondField, Integer(42)),
             cmp(firstField, secondField, 1)
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -179,13 +179,13 @@ class StdLibTest : StringSpec({
         val logikalDB = LogikalDB()
         val firstField = field("firstField", Integer::class.java)
         val secondField = field("secondField", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             cmp(firstField, secondField, 1),
             eq(firstField, Integer(42)),
             eq(secondField, Integer(42))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -193,12 +193,12 @@ class StdLibTest : StringSpec({
     "cmp(field, value) should give back constrained field when constraint matches and field is defined after cmp" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(field, Integer(42)),
             cmp(field, Integer(64), -1)
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -206,12 +206,12 @@ class StdLibTest : StringSpec({
     "cmp(field, value) should give back constrained field when constraint matches and field is defined before cmp" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             cmp(field, Integer(64), -1),
             eq(field, Integer(42))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -219,12 +219,12 @@ class StdLibTest : StringSpec({
     "cmp(field, value) should filter out constrained field when constraint doesn't match and field is defined after cmp" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(field, Integer(42)),
             cmp(field, Integer(64), 1)
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -232,12 +232,12 @@ class StdLibTest : StringSpec({
     "cmp(field, value) should filter out constrained field when constraint doesn't match and field is defined before cmp" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             cmp(field, Integer(64), 1),
             eq(field, Integer(42))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -245,12 +245,12 @@ class StdLibTest : StringSpec({
     "inSet(field, set of value) should give back constrained field when constraint matches and field is defined after inSet" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(field, Integer(42)),
             inSet(field, setOf(Integer(21), Integer(42), Integer(64)))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -258,12 +258,12 @@ class StdLibTest : StringSpec({
     "inSet(field, set of value) should give back constrained field when constraint matches and field is defined before inSet" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             inSet(field, setOf(Integer(21), Integer(42), Integer(64))),
             eq(field, Integer(42))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldNotBeEmpty()
     }
@@ -271,12 +271,12 @@ class StdLibTest : StringSpec({
     "inSet(field, set of value) should filter out constrained field when constraint doesn't match and field is defined after inSet" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             eq(field, Integer(42)),
             inSet(field, setOf(Integer(21), Integer(64)))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }
@@ -284,12 +284,12 @@ class StdLibTest : StringSpec({
     "inSet(field, set of value) should filter out constrained field when constraint doesn't match and field is defined before inSet" {
         val logikalDB = LogikalDB()
         val field = field("field", Integer::class.java)
-        val goal = and(
+        val constraint = and(
             inSet(field, setOf(Integer(21), Integer(64))),
             eq(field, Integer(42))
         )
 
-        val result = logikalDB.run(goal).filterNotNull().toList()
+        val result = logikalDB.run(constraint).filterNotNull().toList()
 
         result.shouldBeEmpty()
     }

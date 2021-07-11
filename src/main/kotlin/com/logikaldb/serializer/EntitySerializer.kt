@@ -19,17 +19,17 @@ package com.logikaldb.serializer
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import com.logikaldb.entity.GoalEntity
+import com.logikaldb.entity.ConstraintEntity
 
 internal class EntitySerializer {
     private val cbor = CBORFactory()
     private val mapper = ObjectMapper(cbor).registerKotlinModule()
 
-    fun serialize(goalEntity: GoalEntity): ByteArray {
-        return mapper.writeValueAsBytes(goalEntity)
+    fun serialize(constraintEntity: ConstraintEntity): ByteArray {
+        return mapper.writeValueAsBytes(constraintEntity)
     }
 
-    fun deserialize(entity: ByteArray): GoalEntity {
-        return mapper.readValue(entity, GoalEntity::class.java)!!
+    fun deserialize(entity: ByteArray): ConstraintEntity {
+        return mapper.readValue(entity, ConstraintEntity::class.java)!!
     }
 }
