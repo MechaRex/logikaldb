@@ -19,10 +19,10 @@ package com.logikaldb.serializer
 import com.logikaldb.entity.AndEntity
 import com.logikaldb.entity.ConstraintEntity
 import com.logikaldb.entity.EqualEntity
+import com.logikaldb.entity.FieldEntity
 import com.logikaldb.entity.GoalEntity
 import com.logikaldb.entity.OrEntity
 import com.logikaldb.entity.ValueEntity
-import com.logikaldb.entity.FieldEntity
 import com.logikaldb.logikal.Logikal.equal
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.property.Arb

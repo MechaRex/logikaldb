@@ -22,11 +22,11 @@ import com.logikaldb.entity.ConstraintEntity
 import com.logikaldb.entity.EqualEntity
 import com.logikaldb.entity.Goal
 import com.logikaldb.entity.OrEntity
-import com.logikaldb.logikal.Logikal
-import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Field
 import com.logikaldb.logikal.FieldConstraint
+import com.logikaldb.logikal.Logikal
 import com.logikaldb.logikal.Name
+import com.logikaldb.logikal.Value
 
 /**
  * Constraint object's responsibility is to handle every kind of constraint creation.

@@ -16,11 +16,11 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 
 package com.logikaldb.converter
 
+import com.logikaldb.entity.FieldEntity
 import com.logikaldb.entity.ValueEntity
 import com.logikaldb.entity.ValueTypeEntity
-import com.logikaldb.entity.FieldEntity
-import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Field
+import com.logikaldb.logikal.Value
 
 internal object ValueConverter {
     fun convertToValueTypeEntity(value: Value): ValueTypeEntity {

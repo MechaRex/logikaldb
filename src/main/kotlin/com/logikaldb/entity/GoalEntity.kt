@@ -19,8 +19,8 @@ package com.logikaldb.entity
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.logikaldb.logikal.GoalFun
-import com.logikaldb.logikal.Value
 import com.logikaldb.logikal.Name
+import com.logikaldb.logikal.Value
 
 internal data class GoalEntity(val goal: Goal)
 
