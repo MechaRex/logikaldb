@@ -8,6 +8,7 @@ Foundational reactive logical database
 * Powerful constraint system
 * Unified data and query model
 * Easily composable queries
+* Embedded query and data modelling language
 * Built on top of FoundationDB
 
 ## Getting started
@@ -54,10 +55,9 @@ LogikalDB basically built up by three big components:
 ## Basics of logic programming in LogikalDB
 To understand LogikalDB you first need to understand it's built-in logical programming system(Logikal), because it's components are used for both data modelling and querying:
 1. `vr(variableName: VariableName, variableType: Class<T>): Variable<T>` variable constructor:
-   - Logikal is optionally typed which means that T can be a concrete value or it can also be a dynamic type like `Value` which is a type alisa for Any?
+   - Logikal is typed which means that T can be a concrete value or it can also be a dynamic type like `Value` which is a type alisa for Any?
    - `val variable = vr("variable", String::class.java)`: creates a logical string variable called `variable`
 2. `eq(variable: Variable<T>, value: T): Goal` constraint:
-   - Logikal is optionally typed, so it supports both statically and dynamically created equality constraints 
    - Goal is basically a synonym for constraint in the system
    - `eq(variable, 42)`: the `variable`'s value will be always `42`, so you can think of it as immutable assignment
    - `eq(firstVariable, secondVarliable)`: `firstVariable` will be tied to the `secondVariable`, which means that it doesn't matter which one is initialized.
@@ -182,9 +182,9 @@ The standard library only uses the publicly available extension points of Logika
 The only speciality is that the standard library is automatically included in LogikalDB.
 
 For now the standard library provides the following functionality:
-1. `notEq` and `notEqDynamic`
-2. `cmp` and `cmpDynamic`
-3. `inSet`
+1. `notEq`: create not equal constraint. `noteq(myVariable, 42)` means that `myVaribale` can't be 42
+2. `cmp`: create comparison constraint. `cmp(firstVariable, secondVaribale, 1)` means that `firstVaribale > secondVariable`
+3. `inSet`: create a set of value constraint. `inSet(myVariable, setOf(21, 42))` means that `myVariable`'s value can be `21` or `42`
 
 Standard library is under work so let us know what kind of functionality you would like to see in it.
 
