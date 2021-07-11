@@ -26,28 +26,7 @@ import com.logikaldb.logikal.Variable
 public object StdLib {
 
     /**
-     * Creates a dynamic not equal constraint.
-     * [notEq] is a constraint constructor.
-     * Not equal means that [firstValue] != [secondValue] and [secondValue] != [firstValue].
-     *
-     * @param firstValue first value in the constraint
-     * @param secondValue second value in the constraint
-     * @return not equal constraint
-     * */
-    public fun notEqDynamic(firstValue: Value, secondValue: Value): Goal {
-        return Constraint.create(firstValue, secondValue) { state ->
-            val valueOfFirst = state.dynamicValueOf(firstValue)
-            val valueOfSecond = state.dynamicValueOf(secondValue)
-            if (valueOfFirst == valueOfSecond) {
-                null
-            } else {
-                state
-            }
-        }
-    }
-
-    /**
-     * Creates a typed not equal variable constraint.
+     * Creates a not equal variable constraint.
      * [notEq] is a constraint constructor.
      * Not equal means that [variable] != [expectedValue] and [expectedValue] != [variable].
      *
@@ -56,7 +35,7 @@ public object StdLib {
      * @return not equal constraint
      * */
     public fun <T> notEq(variable: Variable<T>, expectedValue: T): Goal {
-        return Constraint.create(listOf(variable, expectedValue)) { state ->
+        return Constraint.create(listOf(variable, expectedValue as Value)) { state ->
             val value = state.valueOf(variable)
             if (value == expectedValue) {
                 null
@@ -67,7 +46,7 @@ public object StdLib {
     }
 
     /**
-     * Creates a typed not equal variable constraint.
+     * Creates a not equal variable constraint.
      * [notEq] is a constraint constructor.
      * Not equal means that [firstVariable] != [secondVariable] and [secondVariable] != [firstVariable].
      *
@@ -89,38 +68,7 @@ public object StdLib {
     }
 
     /**
-     * Creates a dynamic comparability constraint.
-     * [cmp] is a constraint constructor.
-     * Comparability means that [firstValue] compareTo [secondValue] == [compareValue].
-     *
-     * @param firstValue first value in the constraint
-     * @param secondValue second value in the constraint
-     * @param compareValue provided [compareTo] result value to match
-     * @return comparability constraint
-     * */
-    public fun cmpDynamic(firstValue: Value, secondValue: Value, compareValue: Int): Goal {
-        return Constraint.create(firstValue, secondValue, compareValue) { state ->
-            val valueOfFirst = state.dynamicValueOf(firstValue)
-            val valueOfSecond = state.dynamicValueOf(secondValue)
-
-            if (valueOfFirst::class != valueOfSecond::class) {
-                throw IllegalArgumentException("Values must be of the same type!")
-            }
-            if (valueOfFirst !is Comparable<*> || valueOfSecond !is Comparable<*>) {
-                throw IllegalArgumentException("Values must be comparable!")
-            }
-
-            val compareResult = (valueOfFirst as Comparable<Value>).compareTo(valueOfSecond)
-            if (compareResult == compareValue) {
-                state
-            } else {
-                null
-            }
-        }
-    }
-
-    /**
-     * Creates a typed comparability constraint.
+     * Creates a comparability constraint.
      * [cmp] is a constraint constructor.
      * Comparability means that [variable] compareTo [value] == [expectedCompareValue].
      *
@@ -143,7 +91,7 @@ public object StdLib {
     }
 
     /**
-     * Creates a typed comparability constraint.
+     * Creates a comparability constraint.
      * [cmp] is a constraint constructor.
      * Comparability means that [firstVariable] compareTo [secondVariable] == [expectedCompareValue].
      *
@@ -169,7 +117,7 @@ public object StdLib {
     /**
      * Creates an in set constraint.
      * [inSet] is a constraint constructor.
-     * In set constrains means that the provided variable has separately the provided set of values.
+     * In set constrains means that the provided variable can have the provided set of values.
      *
      * @param variable provided variable
      * @param values provided set of values

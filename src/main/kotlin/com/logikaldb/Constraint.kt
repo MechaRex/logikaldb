@@ -43,22 +43,7 @@ public object Constraint {
     }
 
     /**
-     * Creates a dynamic equality constraint between the firstValue and the secondValue.
-     * [eq] is a constraint constructor.
-     * Equality means that [firstValue] == [secondValue] and [secondValue] == [firstValue].
-     *
-     * @param firstValue first value in the constraint
-     * @param secondValue second value in the constraint
-     * @return equality constraint
-     * */
-    public fun eqDynamic(firstValue: Value, secondValue: Value): Goal {
-        val firstValueEntity = ValueConverter.convertToValueTypeEntity(firstValue)
-        val secondValueEntity = ValueConverter.convertToValueTypeEntity(secondValue)
-        return EqualEntity(firstValueEntity, secondValueEntity)
-    }
-
-    /**
-     * Creates a typed equality constraint between the firstValue and the secondValue.
+     * Creates a equality constraint between the firstValue and the secondValue.
      * [eq] is a constraint constructor.
      * Equality means that [variable] == [value] and [value] == [variable].
      *
@@ -73,7 +58,7 @@ public object Constraint {
     }
 
     /**
-     * Creates a typed equality constraint between the firstValue and the secondValue.
+     * Creates a equality constraint between the firstValue and the secondValue.
      * [eq] is a constraint constructor.
      * Equality means that [firstVariable] == [secondVariable] and [secondVariable] == [firstVariable].
      *
@@ -103,22 +88,6 @@ public object Constraint {
         val constrainedVariables = parameterValues.filterIsInstance<Variable<*>>()
         val constraintGoal = Logikal.constraint(constrainedVariables, constraintFun)
         return ConstraintEntity(constraintGoal)
-    }
-
-    /**
-     * Creates a custom constraint with it's own custom logic.
-     * [create] is a constraint constructor.
-     * Custom logic needs to follow the [VariableConstraint] functional interface, which is basically a state filter: (State) -> State?.
-     *
-     * @param parameterValues values used in the custom constraint
-     * @param constraintFun implementation of the custom constraint
-     * @return custom constraint
-     * */
-    public fun create(
-        vararg parameterValues: Value,
-        constraintFun: VariableConstraint
-    ): Goal {
-        return create(parameterValues.toList(), constraintFun)
     }
 
     /**
