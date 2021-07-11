@@ -79,15 +79,15 @@ public object Constraint {
      * Custom logic needs to follow the [FieldConstraint] functional interface, which is basically a state filter: (State) -> State?.
      *
      * @param parameterValues values used in the custom constraint
-     * @param constraintFun implementation of the custom constraint
+     * @param fieldConstraint implementation of the custom constraint
      * @return custom constraint
      * */
     public fun create(
         parameterValues: List<Value>,
-        constraintFun: FieldConstraint
+        fieldConstraint: FieldConstraint
     ): Goal {
         val constrainedFields = parameterValues.filterIsInstance<Field<*>>()
-        val constraintGoal = Logikal.constraint(constrainedFields, constraintFun)
+        val constraintGoal = Logikal.constraint(constrainedFields, fieldConstraint)
         return ConstraintEntity(constraintGoal)
     }
 
