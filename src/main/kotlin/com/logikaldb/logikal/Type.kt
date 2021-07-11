@@ -17,7 +17,6 @@ along with the logikaldb library. If not, see <http://www.gnu.org/licenses/>.*/
 package com.logikaldb.logikal
 
 public typealias Value = Any
-public typealias VariableName = String
-public data class Variable<T>(val variableName: VariableName, val variableType: Class<T>) : java.io.Serializable
-public typealias VariableConstraint = (State) -> State?
-public typealias Result = Map<Variable<*>, Value>
+public typealias Name = String
+public data class Field<T>(val name: Name, val type: Class<T>) : java.io.Serializable
+public typealias FieldConstraint = (State) -> State?

@@ -25,25 +25,25 @@ import java.math.BigDecimal
 
 class StateTest : StringSpec({
     "addConstraint adds a constraint to an empty constraint map" {
-        val variable = Variable("variable", String::class.java)
-        val variableConstraint = { state: State -> state }
+        val field = Field("field", String::class.java)
+        val fieldConstraint = { state: State -> state }
         val underTest = State()
 
-        val result = underTest.addConstraint(variable, variableConstraint)
+        val result = underTest.addConstraint(field, fieldConstraint)
 
-        result.hasConstraint(variable).shouldBeTrue()
-        result.constraintsOf(variable).shouldContainExactly(variableConstraint)
+        result.hasConstraint(field).shouldBeTrue()
+        result.constraintsOf(field).shouldContainExactly(fieldConstraint)
     }
 
     "addConstraint adds a constraint to an non-empty constraint map" {
-        val variable = Variable("variable", String::class.java)
-        val variableConstraint = { state: State -> state }
-        val underTest = State(constraintMap = mapOf(variable to listOf(variableConstraint)))
+        val field = Field("field", String::class.java)
+        val fieldConstraint = { state: State -> state }
+        val underTest = State(constraintMap = mapOf(field to listOf(fieldConstraint)))
 
-        val result = underTest.addConstraint(variable, variableConstraint)
+        val result = underTest.addConstraint(field, fieldConstraint)
 
-        result.hasConstraint(variable).shouldBeTrue()
-        result.constraintsOf(variable).shouldContainExactly(variableConstraint, variableConstraint)
+        result.hasConstraint(field).shouldBeTrue()
+        result.constraintsOf(field).shouldContainExactly(fieldConstraint, fieldConstraint)
     }
 
     "unify gives back the input state if the two primitive value is the same" {
@@ -54,162 +54,162 @@ class StateTest : StringSpec({
         underTest.shouldBe(result)
     }
 
-    "unify gives back the input state if the two variable's value is the same" {
-        val firstVariable = Variable("firstVariable", Integer::class.java)
-        val secondVariable = Variable("secondVariable", Integer::class.java)
+    "unify gives back the input state if the two field's value is the same" {
+        val firstField = Field("firstField", Integer::class.java)
+        val secondField = Field("secondField", Integer::class.java)
         val underTest = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to 1,
-                    secondVariable to 1
+                    firstField to 1,
+                    secondField to 1
                 )
             )
         )
 
-        val result = underTest.unify(firstVariable, secondVariable)
+        val result = underTest.unify(firstField, secondField)
 
         underTest.shouldBe(result)
     }
 
-    "unify gives back the input state if the two variable's object value is the same" {
-        val firstVariable = Variable("firstVariable", BigDecimal::class.java)
-        val secondVariable = Variable("secondVariable", BigDecimal::class.java)
+    "unify gives back the input state if the two field's object value is the same" {
+        val firstField = Field("firstField", BigDecimal::class.java)
+        val secondField = Field("secondField", BigDecimal::class.java)
         val underTest = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to BigDecimal(1),
-                    secondVariable to BigDecimal(1)
+                    firstField to BigDecimal(1),
+                    secondField to BigDecimal(1)
                 )
             )
         )
 
-        val result = underTest.unify(firstVariable, secondVariable)
+        val result = underTest.unify(firstField, secondField)
 
         underTest.shouldBe(result)
     }
 
-    "unify adds the new variable to the value map" {
-        val variable = Variable("variable", Integer::class.java)
-        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)))
+    "unify adds the new field to the value map" {
+        val field = Field("field", Integer::class.java)
+        val expectedResult = State(fieldValues = FieldValues(mapOf(field to 1)))
         val underTest = State()
 
-        val result = underTest.unify(variable, 1)
+        val result = underTest.unify(field, 1)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify adds the new variable to the value map the other way" {
-        val variable = Variable("variable", Integer::class.java)
-        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)))
+    "unify adds the new field to the value map the other way" {
+        val field = Field("field", Integer::class.java)
+        val expectedResult = State(fieldValues = FieldValues(mapOf(field to 1)))
         val underTest = State()
 
-        val result = underTest.unify(1, variable)
+        val result = underTest.unify(1, field)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify creates two equal empty variables and then assign the value to the second variable through the first variable" {
-        val firstVariable = Variable("firstVariable", Integer::class.java)
-        val secondVariable = Variable("secondVariable", Integer::class.java)
+    "unify creates two equal empty fields and then assign the value to the second field through the first field" {
+        val firstField = Field("firstField", Integer::class.java)
+        val secondField = Field("secondField", Integer::class.java)
         val expectedResult = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to secondVariable,
-                    secondVariable to 1
+                    firstField to secondField,
+                    secondField to 1
                 )
             )
         )
         val underTest = State()
 
-        val result = underTest.unify(firstVariable, secondVariable)?.unify(firstVariable, 1)
+        val result = underTest.unify(firstField, secondField)?.unify(firstField, 1)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify creates two equal empty variables and then assign the value to the second variable" {
-        val firstVariable = Variable("firstVariable", Integer::class.java)
-        val secondVariable = Variable("secondVariable", Integer::class.java)
+    "unify creates two equal empty fields and then assign the value to the second field" {
+        val firstField = Field("firstField", Integer::class.java)
+        val secondField = Field("secondField", Integer::class.java)
         val expectedResult = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to secondVariable,
-                    secondVariable to 1
+                    firstField to secondField,
+                    secondField to 1
                 )
             )
         )
         val underTest = State()
 
-        val result = underTest.unify(firstVariable, secondVariable)?.unify(secondVariable, 1)
+        val result = underTest.unify(firstField, secondField)?.unify(secondField, 1)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify creates a first variable with a value and then assign it to the second variable" {
-        val firstVariable = Variable("firstVariable", Integer::class.java)
-        val secondVariable = Variable("secondVariable", Integer::class.java)
+    "unify creates a first field with a value and then assign it to the second field" {
+        val firstField = Field("firstField", Integer::class.java)
+        val secondField = Field("secondField", Integer::class.java)
         val expectedResult = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to 1,
-                    secondVariable to 1
+                    firstField to 1,
+                    secondField to 1
                 )
             )
         )
         val underTest = State()
 
-        val result = underTest.unify(firstVariable, 1)?.unify(firstVariable, secondVariable)
+        val result = underTest.unify(firstField, 1)?.unify(firstField, secondField)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify creates a first variable with a value and then reverse assign it to the second variable" {
-        val firstVariable = Variable("firstVariable", Integer::class.java)
-        val secondVariable = Variable("secondVariable", Integer::class.java)
+    "unify creates a first field with a value and then reverse assign it to the second field" {
+        val firstField = Field("firstField", Integer::class.java)
+        val secondField = Field("secondField", Integer::class.java)
         val expectedResult = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to 1,
-                    secondVariable to 1
+                    firstField to 1,
+                    secondField to 1
                 )
             )
         )
         val underTest = State()
 
-        val result = underTest.unify(firstVariable, 1)?.unify(secondVariable, firstVariable)
+        val result = underTest.unify(firstField, 1)?.unify(secondField, firstField)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify adds the new variable to the value map with matching id constraint" {
-        val variable = Variable("variable", Integer::class.java)
-        val variableConstraint = { state: State -> state }
-        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)), constraintMap = mapOf(variable to listOf(variableConstraint)))
-        val underTest = State(constraintMap = mapOf(variable to listOf(variableConstraint)))
+    "unify adds the new field to the value map with matching id constraint" {
+        val field = Field("field", Integer::class.java)
+        val fieldConstraint = { state: State -> state }
+        val expectedResult = State(fieldValues = FieldValues(mapOf(field to 1)), constraintMap = mapOf(field to listOf(fieldConstraint)))
+        val underTest = State(constraintMap = mapOf(field to listOf(fieldConstraint)))
 
-        val result = underTest.unify(variable, 1)
-
-        result.shouldBe(expectedResult)
-    }
-
-    "unify adds the new variable to the value map with matching custom constraint" {
-        val variable = Variable("variable", Integer::class.java)
-        val variableConstraint = { _: State -> State(valueMap = VariableMap(mapOf(variable to 2))) }
-        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 2)))
-        val underTest = State(constraintMap = mapOf(variable to listOf(variableConstraint)))
-
-        val result = underTest.unify(variable, 1)
+        val result = underTest.unify(field, 1)
 
         result.shouldBe(expectedResult)
     }
 
-    "unify adds the new variable to the value map with non-matching constraint" {
-        val variable = Variable("variable", Integer::class.java)
-        val nonMatchingVariable = Variable("nonMatchingVariable", Integer::class.java)
-        val variableConstraint = { _: State -> State(valueMap = VariableMap(mapOf(variable to 2))) }
-        val expectedResult = State(valueMap = VariableMap(mapOf(variable to 1)), constraintMap = mapOf(nonMatchingVariable to listOf(variableConstraint)))
-        val underTest = State(constraintMap = mapOf(nonMatchingVariable to listOf(variableConstraint)))
+    "unify adds the new field to the value map with matching custom constraint" {
+        val field = Field("field", Integer::class.java)
+        val fieldConstraint = { _: State -> State(fieldValues = FieldValues(mapOf(field to 2))) }
+        val expectedResult = State(fieldValues = FieldValues(mapOf(field to 2)))
+        val underTest = State(constraintMap = mapOf(field to listOf(fieldConstraint)))
 
-        val result = underTest.unify(variable, 1)
+        val result = underTest.unify(field, 1)
+
+        result.shouldBe(expectedResult)
+    }
+
+    "unify adds the new field to the value map with non-matching constraint" {
+        val field = Field("field", Integer::class.java)
+        val nonMatchingField = Field("nonMatchingField", Integer::class.java)
+        val fieldConstraint = { _: State -> State(fieldValues = FieldValues(mapOf(field to 2))) }
+        val expectedResult = State(fieldValues = FieldValues(mapOf(field to 1)), constraintMap = mapOf(nonMatchingField to listOf(fieldConstraint)))
+        val underTest = State(constraintMap = mapOf(nonMatchingField to listOf(fieldConstraint)))
+
+        val result = underTest.unify(field, 1)
 
         result.shouldBe(expectedResult)
     }
@@ -222,36 +222,36 @@ class StateTest : StringSpec({
         result.shouldBeNull()
     }
 
-    "unify gives back null if the two variable's value is different" {
-        val firstVariable = Variable("firstVariable", Integer::class.java)
-        val secondVariable = Variable("secondVariable", Integer::class.java)
+    "unify gives back null if the two field's value is different" {
+        val firstField = Field("firstField", Integer::class.java)
+        val secondField = Field("secondField", Integer::class.java)
         val underTest = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to 1,
-                    secondVariable to 2
+                    firstField to 1,
+                    secondField to 2
                 )
             )
         )
 
-        val result = underTest.unify(firstVariable, secondVariable)
+        val result = underTest.unify(firstField, secondField)
 
         result.shouldBeNull()
     }
 
-    "unify gives back null if the two variable's value and type is different" {
-        val firstVariable = Variable("firstVariable", String::class.java)
-        val secondVariable = Variable("secondVariable", BigDecimal::class.java)
+    "unify gives back null if the two field's value and type is different" {
+        val firstField = Field("firstField", String::class.java)
+        val secondField = Field("secondField", BigDecimal::class.java)
         val underTest = State(
-            valueMap = VariableMap(
+            fieldValues = FieldValues(
                 mapOf(
-                    firstVariable to "1",
-                    secondVariable to BigDecimal(2)
+                    firstField to "1",
+                    secondField to BigDecimal(2)
                 )
             )
         )
 
-        val result = underTest.unify(firstVariable, secondVariable)
+        val result = underTest.unify(firstField, secondField)
 
         result.shouldBeNull()
     }

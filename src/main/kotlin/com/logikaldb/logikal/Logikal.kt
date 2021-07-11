@@ -24,18 +24,18 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 internal object Logikal {
-    fun constraint(constrainedVariables: List<Variable<*>>, variableConstraint: VariableConstraint): GoalFun = GoalFun { state ->
-        val isEveryConstrainedVariableInitialized = constrainedVariables.all { state.hasValue(it) }
-        val stateWithConstraints = constrainedVariables.fold(state, createConstraintRegister(variableConstraint))
-        if (isEveryConstrainedVariableInitialized && stateWithConstraints != null) {
-            flowOf(variableConstraint(stateWithConstraints))
+    fun constraint(constrainedFields: List<Field<*>>, fieldConstraint: FieldConstraint): GoalFun = GoalFun { state ->
+        val isEveryConstrainedFieldInitialized = constrainedFields.all { state.hasValue(it) }
+        val stateWithConstraints = constrainedFields.fold(state, createConstraintRegister(fieldConstraint))
+        if (isEveryConstrainedFieldInitialized && stateWithConstraints != null) {
+            flowOf(fieldConstraint(stateWithConstraints))
         } else {
             flowOf(stateWithConstraints)
         }
     }
 
-    private fun createConstraintRegister(variableConstraint: VariableConstraint) = { state: State?, variable: Variable<*> ->
-        state?.addConstraint(variable, variableConstraint)
+    private fun createConstraintRegister(fieldConstraint: FieldConstraint) = { state: State?, field: Field<*> ->
+        state?.addConstraint(field, fieldConstraint)
     }
 
     fun equal(firstValue: Value, secondValue: Value): GoalFun = GoalFun { state ->

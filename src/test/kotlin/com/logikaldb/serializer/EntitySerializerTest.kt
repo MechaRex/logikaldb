@@ -19,10 +19,10 @@ package com.logikaldb.serializer
 import com.logikaldb.entity.AndEntity
 import com.logikaldb.entity.ConstraintEntity
 import com.logikaldb.entity.EqualEntity
+import com.logikaldb.entity.FieldEntity
 import com.logikaldb.entity.GoalEntity
 import com.logikaldb.entity.OrEntity
 import com.logikaldb.entity.ValueEntity
-import com.logikaldb.entity.VariableEntity
 import com.logikaldb.logikal.Logikal.equal
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.property.Arb
@@ -40,7 +40,7 @@ class EntitySerializerTest : StringSpec({
     val underTest = EntitySerializer()
 
     fun createEqualEntity(randomPair: Pair<Sample<String>, Sample<Any>>): EqualEntity {
-        return EqualEntity(VariableEntity(randomPair.first.value, String::class.java), ValueEntity(randomPair.second.value))
+        return EqualEntity(FieldEntity(randomPair.first.value, String::class.java), ValueEntity(randomPair.second.value))
     }
 
     fun anyRandomValues(randomSource: RandomSource): Sequence<Sample<Any>> {
@@ -52,9 +52,9 @@ class EntitySerializerTest : StringSpec({
 
     "A serialized and deserialized EqualEntity must be the same as the original entity" {
         val equalGoalEntityArb = arb { randomSource ->
-            val randomVariables = Arb.string().values(randomSource)
+            val randomFields = Arb.string().values(randomSource)
             val randomValues = anyRandomValues(randomSource)
-            randomVariables.zip(randomValues)
+            randomFields.zip(randomValues)
                 .map(::createEqualEntity)
                 .map { GoalEntity(it) }
         }
@@ -67,7 +67,7 @@ class EntitySerializerTest : StringSpec({
         val constraintGoalEntityArb = arb { randomSource ->
             val randomConstraints = Arb.string().values(randomSource)
             val randomParameters = Arb.list(Arb.string())
-                .map { parameterNames -> parameterNames.map { VariableEntity(it, String::class.java) } }
+                .map { parameterNames -> parameterNames.map { FieldEntity(it, String::class.java) } }
                 .values(randomSource)
             randomConstraints.zip(randomParameters)
                 .map { ConstraintEntity(equal(1, 1)) }
@@ -81,9 +81,9 @@ class EntitySerializerTest : StringSpec({
 
     "A serialized and deserialized AndEntity must be the same as the original entity" {
         val equalEntityArb = arb { randomSource ->
-            val randomVariables = Arb.string().values(randomSource)
+            val randomFields = Arb.string().values(randomSource)
             val randomValues = anyRandomValues(randomSource)
-            randomVariables.zip(randomValues)
+            randomFields.zip(randomValues)
                 .map(::createEqualEntity)
         }
         val andGoalEntityArb = arb { randomSource ->
@@ -98,9 +98,9 @@ class EntitySerializerTest : StringSpec({
 
     "A serialized and deserialized OrEntity must be the same as the original entity" {
         val equalEntityArb = arb { randomSource ->
-            val randomVariables = Arb.string().values(randomSource)
+            val randomFields = Arb.string().values(randomSource)
             val randomValues = anyRandomValues(randomSource)
-            randomVariables.zip(randomValues)
+            randomFields.zip(randomValues)
                 .map(::createEqualEntity)
         }
         val orGoalEntityArb = arb { randomSource ->

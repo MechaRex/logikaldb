@@ -20,90 +20,90 @@ package com.logikaldb.logikal
  * State is the stack frame used in the embedded logical programming language.
  * You should not use the [State] constructor directly.
  *
- * @param valueMap variable values
- * @param constraintMap variable constraints
+ * @param fieldValues field values
+ * @param constraintMap field constraints
  * @constructor state instance
  * */
 public data class State(
-    private val valueMap: VariableMap = VariableMap(),
-    private val constraintMap: Map<Variable<*>, List<VariableConstraint>> = emptyMap()
+    private val fieldValues: FieldValues = FieldValues(),
+    private val constraintMap: Map<Field<*>, List<FieldConstraint>> = emptyMap()
 ) {
 
     /**
-     * Shows if a variable has a value in the state.
+     * Shows if a field has a value in the state.
      *
-     * @param variable variable to check
-     * @return does the variable have a value
+     * @param field field to check
+     * @return does the field have a value
      * */
-    public fun <T> hasValue(variable: Variable<T>): Boolean {
-        return valueMap.hasValue(variable)
+    public fun <T> hasValue(field: Field<T>): Boolean {
+        return fieldValues.hasValue(field)
     }
 
     /**
      * Gives back the value of the provided value.
-     * Value can be either [Value] or [Variable].
-     * If the value is [Variable] then it gives back the value of the variable in the state.
+     * Value can be either [Value] or [Field].
+     * If the value is [Field] then it gives back the value of the field in the state.
      * If the value is [Value] then it gives back the provided value itself.
      *
      * @param value provided value
      * @return value of the provided value
      * */
     public fun dynamicValueOf(value: Value): Value {
-        return valueMap.dynamicValueOf(value)
+        return fieldValues.dynamicValueOf(value)
     }
 
     /**
-     * Gives back the value of the variable in the state.
+     * Gives back the value of the field in the state.
      *
-     * @param variable provided variable
-     * @return value of the provided value or null if the variable doesn't have a value
+     * @param field provided field
+     * @return value of the provided value or null if the field doesn't have a value
      * */
-    public fun <T> valueOf(variable: Variable<T>): T? {
-        return valueMap.valueOf(variable)
+    public fun <T> valueOf(field: Field<T>): T? {
+        return fieldValues.valueOf(field)
     }
 
     /**
      * Gives back the result of the state.
-     * [Result] is the values of the provided variables.
+     * [FieldValues] is the values of the provided fields.
      *
-     * @param variables provided variables that we are interested in
+     * @param fields provided fields that we are interested in
      * @return result of the state
      * */
-    public fun valuesOf(variables: List<Variable<*>>): VariableMap {
-        return if (variables.isEmpty()) {
-            val variableValueMap = valueMap.keys().associateWith { dynamicValueOf(it) }
-            VariableMap(variableValueMap)
+    public fun valuesOf(fields: List<Field<*>>): FieldValues {
+        return if (fields.isEmpty()) {
+            val fieldValueMap = fieldValues.keys().associateWith { dynamicValueOf(it) }
+            FieldValues(fieldValueMap)
         } else {
-            val variableValueMap = variables.associateWith { dynamicValueOf(it) }
-            VariableMap(variableValueMap)
+            val fieldValueMap = fields.associateWith { dynamicValueOf(it) }
+            FieldValues(fieldValueMap)
         }
     }
 
     /**
      * Gives back the result of the state.
-     * [Result] is the values of the provided variables.
+     * [FieldValues] is the values of the provided fields.
      *
-     * @param variables provided variables that we are interested in
+     * @param fields provided fields that we are interested in
      * @return result of the state
      * */
-    public fun valuesOf(vararg variables: Variable<*>): VariableMap {
-        return valuesOf(variables.toList())
+    public fun valuesOf(vararg fields: Field<*>): FieldValues {
+        return valuesOf(fields.toList())
     }
 
-    internal fun hasConstraint(variable: Variable<*>): Boolean {
-        return constraintMap.containsKey(variable)
+    internal fun hasConstraint(field: Field<*>): Boolean {
+        return constraintMap.containsKey(field)
     }
 
-    internal fun constraintsOf(variable: Variable<*>): List<VariableConstraint> {
-        return constraintMap[variable] ?: error("Variable doesn't have constraints!")
+    internal fun constraintsOf(field: Field<*>): List<FieldConstraint> {
+        return constraintMap[field] ?: error("Field doesn't have constraints!")
     }
 
-    internal fun addConstraint(variable: Variable<*>, variableConstraint: VariableConstraint): State {
-        return if (constraintMap.containsKey(variable)) {
-            val variableConstraints = constraintMap.getValue(variable)
-            copy(constraintMap = constraintMap - variable + Pair(variable, variableConstraints + variableConstraint))
+    internal fun addConstraint(field: Field<*>, fieldConstraint: FieldConstraint): State {
+        return if (constraintMap.containsKey(field)) {
+            val fieldConstraints = constraintMap.getValue(field)
+            copy(constraintMap = constraintMap - field + Pair(field, fieldConstraints + fieldConstraint))
         } else {
-            copy(constraintMap = constraintMap + Pair(variable, listOf(variableConstraint)))
+            copy(constraintMap = constraintMap + Pair(field, listOf(fieldConstraint)))
         }
     }
 
@@ -112,26 +112,26 @@ public data class State(
         val evaluatedSecondValue = dynamicValueOf(secondValue)
         return when {
             evaluatedFirstValue == evaluatedSecondValue -> this
-            evaluatedFirstValue is Variable<*> -> addAndCheckVariable(evaluatedFirstValue, evaluatedSecondValue)
-            evaluatedSecondValue is Variable<*> -> addAndCheckVariable(evaluatedSecondValue, evaluatedFirstValue)
+            evaluatedFirstValue is Field<*> -> addAndCheckField(evaluatedFirstValue, evaluatedSecondValue)
+            evaluatedSecondValue is Field<*> -> addAndCheckField(evaluatedSecondValue, evaluatedFirstValue)
             else -> null
         }
     }
 
-    private fun addAndCheckVariable(variable: Variable<*>, value: Value): State? {
-        val newState = copy(valueMap = valueMap.plus(Pair(variable, value)))
-        val variableConstraints = constraintMap.getOrDefault(variable, emptyList())
-        return variableConstraints.filter { variableConstraint ->
-            val constrainedVariables = getConstrainedVariables(variableConstraint)
-            constrainedVariables.all { newState.hasValue(it) }
+    private fun addAndCheckField(field: Field<*>, value: Value): State? {
+        val newState = copy(fieldValues = fieldValues.plus(Pair(field, value)))
+        val fieldConstraints = constraintMap.getOrDefault(field, emptyList())
+        return fieldConstraints.filter { fieldConstraint ->
+            val constrainedFields = getConstrainedFields(fieldConstraint)
+            constrainedFields.all { newState.hasValue(it) }
         }.fold(newState, ::executeConstraint)
     }
 
-    private fun getConstrainedVariables(variableConstraint: VariableConstraint): List<Variable<*>> {
-        return constraintMap.filterValues { it.contains(variableConstraint) }.map { it.key }
+    private fun getConstrainedFields(fieldConstraint: FieldConstraint): List<Field<*>> {
+        return constraintMap.filterValues { it.contains(fieldConstraint) }.map { it.key }
     }
 
-    private fun executeConstraint(state: State?, variableConstraint: VariableConstraint): State? {
-        return if (state != null) variableConstraint(state) else null
+    private fun executeConstraint(state: State?, fieldConstraint: FieldConstraint): State? {
+        return if (state != null) fieldConstraint(state) else null
     }
 }
